@@ -21,7 +21,7 @@ public class DownloadsTable extends TableView<PageLink>
 		this.datas = FXCollections.observableArrayList();
 
 		TableColumn originalLinkColumn = new TableColumn("Original link");
-		originalLinkColumn.setCellValueFactory(new PropertyValueFactory<PageLink, URL>("URL"));
+		originalLinkColumn.setCellValueFactory(new PropertyValueFactory<PageLink, URL>("url"));
 		TableColumn byteSizeColumn = new TableColumn("Size");
 		byteSizeColumn.setCellValueFactory(new PropertyValueFactory<PageLink, String>("byteSizeString"));
 

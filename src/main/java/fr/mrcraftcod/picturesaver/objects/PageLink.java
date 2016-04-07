@@ -21,22 +21,32 @@ public class PageLink
 		this.byteSize = new SimpleLongProperty(-1);
 	}
 
+	public SimpleLongProperty byteSizeProperty()
+	{
+		return this.byteSize;
+	}
+
+	public SimpleObjectProperty<URL> urlProperty()
+	{
+		return this.url;
+	}
+
 	@Override
 	public String toString()
 	{
-		return this.getURL().toString() + " (" + getByteSize() + ")";
+		return this.getUrl().toString() + " (" + getByteSize() + ")";
 	}
 
-	public URL getURL()
+	public URL getUrl()
 	{
-		return this.url.get();
+		return this.urlProperty().get();
 	}
 
 	public void fetch()
 	{
 		try
 		{
-			this.byteSize.set(URLHandler.getConnectionLinkLength(getURL()));
+			this.byteSize.set(URLHandler.getConnectionLinkLength(getUrl()));
 		}
 		catch(UnirestException | URISyntaxException e)
 		{
@@ -51,6 +61,6 @@ public class PageLink
 
 	public long getByteSize()
 	{
-		return this.byteSize.get();
+		return this.byteSizeProperty().get();
 	}
 }
