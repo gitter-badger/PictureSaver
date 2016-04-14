@@ -5,23 +5,23 @@ import fr.mrcraftcod.picturesaver.interfaces.ProgressListener;
 import fr.mrcraftcod.picturesaver.objects.Page;
 import fr.mrcraftcod.picturesaver.utils.Log;
 import fr.mrcraftcod.utils.http.URLUtils;
+import fr.mrcraftcod.utils.threads.ThreadLoop;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-public class ThreadDispatcher extends Thread implements ClipboardListener
+
+public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 {
 	private static final long SLEEP_INTERVAL = 750;
 	private final ThreadClipboard threadClipboard;
 	private final ArrayList<ProgressListener> progressListeners;
 	private final LinkedBlockingQueue<Page> waitingDownload;
 	private final ExecutorService executor;
-	private boolean running;
 
 	public ThreadDispatcher()
 	{
 		this.setName("PS-TD");
-		this.running = true;
 		this.waitingDownload = new LinkedBlockingQueue<Page>();
 		this.progressListeners = new ArrayList<>();
 		this.threadClipboard = new ThreadClipboard();
@@ -36,24 +36,20 @@ public class ThreadDispatcher extends Thread implements ClipboardListener
 	}
 
 	@Override
-	public void run()
-	{
-		while(running && !this.isInterrupted())
-		{
-			try
-			{
-				Thread.sleep(SLEEP_INTERVAL);
-			}
-			catch(InterruptedException e){}
-		}
-	}
-
-	public void close()
+	public void onClosed()
 	{
 		this.threadClipboard.close();
-		this.interrupt();
-		this.running = false;
 		executor.shutdown();
+	}
+
+	@Override
+	public void loop()
+	{
+		try
+		{
+			Thread.sleep(SLEEP_INTERVAL);
+		}
+		catch(InterruptedException e){}
 	}
 
 	@Override

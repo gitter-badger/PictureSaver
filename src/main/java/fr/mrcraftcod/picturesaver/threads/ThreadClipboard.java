@@ -1,13 +1,14 @@
 package fr.mrcraftcod.picturesaver.threads;
 
 import fr.mrcraftcod.picturesaver.interfaces.ClipboardListener;
+import fr.mrcraftcod.utils.threads.ThreadLoop;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
 
-public class ThreadClipboard extends Thread
+public class ThreadClipboard extends ThreadLoop
 {
 	private static final long SLEEP_INTERVAL = 333;
 	private String lastClipboard;
@@ -26,25 +27,6 @@ public class ThreadClipboard extends Thread
 		running = true;
 		listeners = new ArrayList<>();
 		lastClipboard = takeOnlyNew ? getClipboardAsText() : null;
-	}
-
-	@Override
-	public void run()
-	{
-		while(!this.isInterrupted() && running)
-		{
-			String newClipboard = getClipboardAsText();
-			if(newClipboard != null && !newClipboard.equals(lastClipboard))
-			{
-				lastClipboard = newClipboard;
-				listeners.forEach(listener -> listener.clipboardChangeEvent(newClipboard));
-			}
-			try
-			{
-				Thread.sleep(SLEEP_INTERVAL);
-			}
-			catch(InterruptedException e){}
-		}
 	}
 
 	private String getClipboardAsText()
@@ -66,9 +48,22 @@ public class ThreadClipboard extends Thread
 		this.listeners.add(listener);
 	}
 
-	public void close()
+	@Override
+	public void onClosed(){}
+
+	@Override
+	public void loop()
 	{
-		this.interrupt();
-		this.running = false;
+		String newClipboard = getClipboardAsText();
+		if(newClipboard != null && !newClipboard.equals(lastClipboard))
+		{
+			lastClipboard = newClipboard;
+			listeners.forEach(listener -> listener.clipboardChangeEvent(newClipboard));
+		}
+		try
+		{
+			Thread.sleep(SLEEP_INTERVAL);
+		}
+		catch(InterruptedException e){}
 	}
 }
