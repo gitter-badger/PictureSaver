@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainFrame extends Application implements ProgressListener
@@ -36,8 +37,12 @@ public class MainFrame extends Application implements ProgressListener
 		stage.show();
 		threadDispatcher = new ThreadDispatcher();
 		threadDispatcher.addProgressListener(this);
-		stage.setOnCloseRequest(event -> threadDispatcher.close());
-		Executors.newSingleThreadExecutor().submit(threadDispatcher);
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		stage.setOnCloseRequest(event -> {
+			threadDispatcher.close();
+			executor.shutdown();
+		});
+		executor.submit(threadDispatcher);
 	}
 
 	private Parent createContent()

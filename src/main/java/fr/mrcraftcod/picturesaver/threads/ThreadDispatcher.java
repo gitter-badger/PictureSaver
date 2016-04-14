@@ -6,6 +6,7 @@ import fr.mrcraftcod.picturesaver.objects.Page;
 import fr.mrcraftcod.picturesaver.utils.Log;
 import fr.mrcraftcod.utils.http.URLUtils;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 public class ThreadDispatcher extends Thread implements ClipboardListener
@@ -14,6 +15,7 @@ public class ThreadDispatcher extends Thread implements ClipboardListener
 	private final ThreadClipboard threadClipboard;
 	private final ArrayList<ProgressListener> progressListeners;
 	private final LinkedBlockingQueue<Page> waitingDownload;
+	private final ExecutorService executor;
 	private boolean running;
 
 	public ThreadDispatcher()
@@ -24,7 +26,8 @@ public class ThreadDispatcher extends Thread implements ClipboardListener
 		this.progressListeners = new ArrayList<>();
 		this.threadClipboard = new ThreadClipboard();
 		this.threadClipboard.addListener(this);
-		Executors.newSingleThreadExecutor().submit(threadClipboard);
+		this.executor = Executors.newSingleThreadExecutor();
+		this.executor.submit(threadClipboard);
 	}
 
 	public void addProgressListener(ProgressListener listener)
@@ -47,9 +50,10 @@ public class ThreadDispatcher extends Thread implements ClipboardListener
 
 	public void close()
 	{
+		this.threadClipboard.close();
 		this.interrupt();
 		this.running = false;
-		threadClipboard.close();
+		executor.shutdown();
 	}
 
 	@Override
