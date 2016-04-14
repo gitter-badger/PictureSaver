@@ -4,6 +4,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import fr.mrcraftcod.picturesaver.utils.Log;
 import fr.mrcraftcod.utils.StringUtils;
 import fr.mrcraftcod.utils.http.URLHandler;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import java.net.URISyntaxException;
@@ -44,14 +45,22 @@ public class PageLink
 
 	public void fetch()
 	{
-		try
+		Platform.runLater(() ->
 		{
-			this.byteSize.set(URLHandler.getConnectionLinkLength(getUrl()));
-		}
-		catch(UnirestException | URISyntaxException e)
-		{
-			Log.warning("Error fetching link size!", e);
-		}
+			try
+			{
+				setByteSize(URLHandler.getConnectionLinkLength(getUrl()));
+			}
+			catch(UnirestException | URISyntaxException e)
+			{
+				Log.warning("Error fetching link size!", e);
+			}
+		});
+	}
+
+	private void setByteSize(long value)
+	{
+		this.byteSize.set(value);
 	}
 
 	public String getByteSizeString()
