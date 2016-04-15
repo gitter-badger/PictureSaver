@@ -38,11 +38,11 @@ public class MainFrame extends Application implements ProgressListener
 		threadDispatcher = new ThreadDispatcher();
 		threadDispatcher.addProgressListener(this);
 		ExecutorService executor = Executors.newSingleThreadExecutor();
+		executor.submit(threadDispatcher);
 		stage.setOnCloseRequest(event -> {
 			threadDispatcher.close();
 			executor.shutdown();
 		});
-		executor.submit(threadDispatcher);
 	}
 
 	private Parent createContent()
