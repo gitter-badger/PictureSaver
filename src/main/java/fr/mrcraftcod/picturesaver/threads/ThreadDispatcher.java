@@ -8,6 +8,7 @@ import fr.mrcraftcod.picturesaver.utils.Log;
 import fr.mrcraftcod.utils.http.URLUtils;
 import fr.mrcraftcod.utils.threads.ThreadLoop;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -67,7 +68,13 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 
 	private void processInit()
 	{
-		this.waitingInit.forEach(Page::fetchLinks);
+		Iterator<Page> iterator = this.waitingInit.iterator();
+		while(iterator.hasNext())
+		{
+			Page page = iterator.next();
+			iterator.remove();
+			page.fetchLinks(pageError -> pageError.setStatus(PageStatus.INITIALIZING));
+		}
 	}
 
 	@Override

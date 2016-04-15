@@ -7,6 +7,8 @@ import fr.mrcraftcod.utils.http.URLHandler;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import org.jdeferred.DeferredManager;
+import org.jdeferred.Promise;
 import java.net.URISyntaxException;
 import java.net.URL;
 public class PageLink
@@ -43,24 +45,26 @@ public class PageLink
 		return this.urlProperty().get();
 	}
 
-	public void fetch()
+	public Promise<Boolean, Throwable, Void> fetch(DeferredManager manager)
 	{
-		Platform.runLater(() ->
+		return manager.when(() ->
 		{
 			try
 			{
 				setByteSize(URLHandler.getConnectionLinkLength(getUrl()));
+				return true;
 			}
 			catch(UnirestException | URISyntaxException e)
 			{
 				Log.warning("Error fetching link size!", e);
 			}
+			return false;
 		});
 	}
 
 	private void setByteSize(long value)
 	{
-		this.byteSize.set(value);
+		Platform.runLater(() -> this.byteSize.set(value));
 	}
 
 	public String getByteSizeString()

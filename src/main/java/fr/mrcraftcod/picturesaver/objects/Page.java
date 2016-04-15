@@ -1,12 +1,15 @@
 package fr.mrcraftcod.picturesaver.objects;
 
-import fr.mrcraftcod.picturesaver.Constants;
 import fr.mrcraftcod.picturesaver.enums.ContentType;
 import fr.mrcraftcod.picturesaver.enums.PageStatus;
 import fr.mrcraftcod.utils.Callback;
 import fr.mrcraftcod.utils.http.URLUtils;
+import javafx.application.Platform;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.Promise;
+import org.jdeferred.impl.DefaultDeferredManager;
+import org.jdeferred.multiple.MultipleResults;
+import org.jdeferred.multiple.OneResult;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +43,25 @@ public class Page
 		return URLUtils.convertStringToURL(URLUtils.pullLinks(findURL).stream().filter(ContentType::isAllowed).collect(Collectors.toList())).stream().map(url -> new PageLink(this, url)).collect(Collectors.toList());
 	}
 
-	public Promise<Page, Throwable, Void> fetchLinks()
+	public void fetchLinks(Callback<Page> errorCallback)
 	{
-		return Constants.deferredManager.when(() -> {
-			this.pageLinks.forEach(PageLink::fetch);
-			return this;
-		}).then(new DoneCallback<Page>(){
-			@Override
-			public void onDone(Page result)
+		Platform.runLater(() -> {
+			DefaultDeferredManager deferredManager = new DefaultDeferredManager();
+			deferredManager.when(this.pageLinks.stream().map(pageLink -> pageLink.fetch(deferredManager)).collect(Collectors.toList()).toArray(new Promise[this.pageLinks.size()])).done(new DoneCallback<MultipleResults>()
 			{
-				Page.this.onLinkFetchedCallbacks.forEach(callback -> callback.call(result));
-			}
+				@Override
+				public void onDone(MultipleResults results)
+				{
+					for(OneResult result : results)
+						if(!(boolean) result.getResult())
+						{
+							errorCallback.call(Page.this);
+							return;
+						}
+					Page.this.onLinkFetchedCallbacks.forEach(pageCallback -> pageCallback.call(Page.this));
+				}
+			});
+			deferredManager.shutdown();
 		});
 	}
 
