@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 public class PageLink
 {
 	private final Page parentPage;
