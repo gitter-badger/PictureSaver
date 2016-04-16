@@ -36,6 +36,8 @@ public class Page
 		this.onLinkFetchedCallbacks = new ArrayList<>();
 		this.onStatusChangeCallbacks = new ArrayList<>();
 		this.status = PageStatus.INITIALIZING;
+		if(ContentType.isAllowed(url.toString()))
+			this.pageLinks.add(new PageLink(this, url));
 		this.pageLinks.addAll(findLinks(url));
 	}
 

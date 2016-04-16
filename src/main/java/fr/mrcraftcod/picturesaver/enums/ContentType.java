@@ -7,7 +7,8 @@ public enum ContentType
 	NULL(null),
 	JPG("jpg"),
 	PNG("png"),
-	WEBM("webm");
+	WEBM("webm"),
+	GIF("gif");
 
 	private final String extension;
 	private final Pattern pattern;
