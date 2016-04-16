@@ -10,8 +10,7 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,11 +48,25 @@ public class MainFrame extends Application implements ProgressListener
 	{
 		downloadsTable = new DownloadsTable();
 
-		VBox root = new VBox();
+		StackPane root = new StackPane();
 		root.setPrefSize(800, 600);
 		root.getChildren().addAll(downloadsTable);
-		VBox.setVgrow(downloadsTable, Priority.ALWAYS);
 
+		/*new Thread(() -> {
+			try
+			{
+				downloadsTable.addPageLinks(new Page("https://instagram.com/p/7IFMstufTV/").getPageLinks());
+				downloadsTable.addPageLinks(new Page("https://instagram.com/p/Piin6aufU3/").getPageLinks());
+				downloadsTable.addPageLinks(new Page("https://instagram.com/p/JUmZ7-Ofc1/").getPageLinks());
+				downloadsTable.addPageLinks(new Page("https://instagram.com/p/J2ksO/").getPageLinks());
+				downloadsTable.addPageLinks(new Page("https://instagram.com/p/qwtU/").getPageLinks());
+				downloadsTable.addPageLinks(new Page("https://instagram.com/p/GpVl/").getPageLinks());
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}).run();*/
 
 		return root;
 	}

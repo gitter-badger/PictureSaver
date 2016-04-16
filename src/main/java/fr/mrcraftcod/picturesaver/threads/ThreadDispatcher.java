@@ -17,23 +17,28 @@ import static fr.mrcraftcod.picturesaver.enums.PageStatus.WAITING_DOWNLOAD;
 public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 {
 	private static final long SLEEP_INTERVAL = 750;
+	private static final int MAX_SIMULTANEOUS_DOWNLOADS = 2;
 	private final ThreadClipboard threadClipboard;
 	private final ArrayList<ProgressListener> progressListeners;
 	private final ArrayList<Page> waitingInit;
 	private final LinkedBlockingQueue<Page> waitingDownload;
 	private final ArrayList<Page> downloaded;
+	private final ArrayList<Page> downloading;
 	private final ExecutorService executor;
+	private int downloadingCount;
 
 	public ThreadDispatcher()
 	{
 		this.setName("PS-TD");
+		this.downloadingCount = 0;
 		this.waitingInit = new ArrayList<Page>();
 		this.waitingDownload = new LinkedBlockingQueue<Page>();
 		this.downloaded = new ArrayList<>();
+		this.downloading = new ArrayList<>();
 		this.progressListeners = new ArrayList<>();
 		this.threadClipboard = new ThreadClipboard();
 		this.threadClipboard.addListener(this);
-		this.executor = Executors.newSingleThreadExecutor();
+		this.executor = Executors.newFixedThreadPool(MAX_SIMULTANEOUS_DOWNLOADS + 1);
 		this.executor.submit(threadClipboard);
 	}
 
@@ -63,7 +68,34 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 
 	private void processDownloads()
 	{
+		if(this.waitingDownload.size() < 1)
+			return;
+		if(this.getDownloadingCount() < MAX_SIMULTANEOUS_DOWNLOADS)
+		{
+			Page downloadPage = this.waitingDownload.remove();
+			this.addDownloadCount();
+			Thread thread = new Thread(new DownloadTask(downloadPage, page -> {
+				page.setStatus(PageStatus.DOWNLOADED);
+				this.removeDownloadCount();
+			}, page -> {
+				this.downloading.remove(page);
+				this.waitingDownload.offer(page);
+				this.removeDownloadCount();
+			}));
+			this.downloading.add(downloadPage);
+			thread.setDaemon(true);
+			this.getExecutor().submit(thread);
+		}
+	}
 
+	private void removeDownloadCount()
+	{
+		this.downloadingCount--;
+	}
+
+	private void addDownloadCount()
+	{
+		this.downloadingCount++;
 	}
 
 	private void processInit()
@@ -103,6 +135,7 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 	private void changeStatus(Page page)
 	{
 		this.waitingInit.remove(page);
+		this.downloading.remove(page);
 		this.downloaded.remove(page);
 		switch(page.getStatus())
 		{
@@ -116,5 +149,15 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 				this.downloaded.add(page);
 				break;
 		}
+	}
+
+	public int getDownloadingCount()
+	{
+		return this.downloadingCount;
+	}
+
+	public ExecutorService getExecutor()
+	{
+		return this.executor;
 	}
 }

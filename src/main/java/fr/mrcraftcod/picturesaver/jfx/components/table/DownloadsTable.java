@@ -20,27 +20,32 @@ public class DownloadsTable extends TableView<PageLink>
 
 		this.datas = FXCollections.observableArrayList();
 
-		TableColumn originalLinkColumn = new TableColumn("Original link");
-		originalLinkColumn.setCellValueFactory(new PropertyValueFactory<PageLink, URL>("url"));
-		TableColumn byteSizeColumn = new TableColumn("Size");
-		byteSizeColumn.setCellValueFactory(new PropertyValueFactory<PageLink, String>("byteSizeString"));
+		TableColumn<PageLink, URL> sourceColumn = new TableColumn<>("Source");
+		sourceColumn.setCellValueFactory(new PropertyValueFactory<>("sourceURL"));
+		TableColumn<PageLink, URL> linkColumn = new TableColumn<>("Link");
+		linkColumn.setCellValueFactory(new PropertyValueFactory<PageLink, URL>("url"));
+		TableColumn<PageLink, Long> byteSizeColumn = new TableColumn<>("Size");
+		byteSizeColumn.setCellValueFactory(new PropertyValueFactory<PageLink, Long>("byteSize"));
 
 		TableColumn infosColumn = new TableColumn("File infos");
-		infosColumn.getColumns().addAll(originalLinkColumn, byteSizeColumn);
+		infosColumn.getColumns().addAll(sourceColumn, linkColumn, byteSizeColumn);
 
-		TableColumn downloadColumn = new TableColumn("Download");
-		TableColumn uploadColumn = new TableColumn("Upload");
-		TableColumn progressColumn = new TableColumn("Progress");
-		progressColumn.getColumns().addAll(downloadColumn, uploadColumn);
+		TableColumn<PageLink, Long> downloadBytesColumn = new TableColumn<>("Downloaded");
+		downloadBytesColumn.setCellValueFactory(new PropertyValueFactory<>("downloadedBytes"));
+		TableColumn<PageLink, ProgressBarMax> downloadProgressColumn = new TableColumn<>("Progress");
+		downloadProgressColumn.setCellValueFactory(new PropertyValueFactory<PageLink, ProgressBarMax>("downloadProgressBar"));
 
-		this.getColumns().addAll(infosColumn, progressColumn);
+		TableColumn downloadingColumn = new TableColumn("Download");
+		downloadingColumn.getColumns().addAll(downloadBytesColumn, downloadProgressColumn);
+
+		this.getColumns().addAll(infosColumn, downloadingColumn);
 
 		this.setItems(datas);
 	}
 
 	public void addPageLinks(Collection<? extends PageLink> pageLinks)
 	{
-		datas.addAll(pageLinks);
+		pageLinks.forEach(datas::add);
 	}
 
 	public void addPage(Page page)
