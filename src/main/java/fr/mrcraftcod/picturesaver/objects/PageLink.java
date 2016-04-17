@@ -2,6 +2,7 @@ package fr.mrcraftcod.picturesaver.objects;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 import fr.mrcraftcod.picturesaver.enums.ContentType;
+import fr.mrcraftcod.picturesaver.enums.LinkStatus;
 import fr.mrcraftcod.picturesaver.jfx.components.table.ProgressBarMax;
 import fr.mrcraftcod.picturesaver.utils.Log;
 import fr.mrcraftcod.utils.FileUtils;
@@ -12,6 +13,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import static fr.mrcraftcod.picturesaver.enums.LinkStatus.WAITING_DOWNLOAD;
 
 public class PageLink
 {
@@ -20,6 +22,8 @@ public class PageLink
 	private final SimpleLongProperty byteSize;
 	private final SimpleLongProperty downloadedBytes;
 	private final SimpleObjectProperty<ProgressBarMax> downloadProgressBar;
+	private final SimpleObjectProperty<LinkStatus> linkStatus;
+	private final SimpleObjectProperty<File> outputFile;
 
 	public PageLink(Page parentPage, URL url)
 	{
@@ -27,7 +31,20 @@ public class PageLink
 		this.url = new SimpleObjectProperty<>(url);
 		this.byteSize = new SimpleLongProperty(-1);
 		this.downloadedBytes = new SimpleLongProperty(-1);
-		this.downloadProgressBar = new SimpleObjectProperty<>(new ProgressBarMax());
+		this.linkStatus = new SimpleObjectProperty<>(WAITING_DOWNLOAD);
+		this.outputFile = new SimpleObjectProperty<>(getOutputFile());
+		this.downloadProgressBar = new SimpleObjectProperty<>(new ProgressBarMax(this.downloadedBytesProperty(), this.byteSizeProperty()));
+		this.downloadProgressBarProperty().get().setMaxWidth(Double.MAX_VALUE);
+	}
+
+	public SimpleObjectProperty<File> outputFileProperty()
+	{
+		return this.outputFile;
+	}
+
+	public SimpleObjectProperty<LinkStatus> linkStatusProperty()
+	{
+		return this.linkStatus;
 	}
 
 	public SimpleLongProperty byteSizeProperty()
@@ -71,7 +88,6 @@ public class PageLink
 		try
 		{
 			this.setByteSize(URLHandler.getConnectionLinkLength(getUrl()));
-			this.downloadProgressBarProperty().get().setMax(this.getByteSize());
 			return true;
 		}
 		catch(UnirestException | URISyntaxException e)
@@ -99,11 +115,12 @@ public class PageLink
 	public void setDownloadedBytes(long downloadedBytes)
 	{
 		this.downloadedBytes.set(downloadedBytes);
-		this.downloadProgressBarProperty().get().setValue(downloadedBytes);
 	}
 
 	public File getOutputFile()
 	{
+		if(this.outputFileProperty() != null)
+			return this.outputFileProperty().get();
 		File file = new File(this.parentPage.getOutputFile(), FileUtils.sanitizeFileName(this.getFileName()));
 		FileUtils.createDirectories(file);
 		return file;
@@ -113,5 +130,15 @@ public class PageLink
 	{
 		String url = this.url.toString();
 		return url.substring(url.lastIndexOf("/") + 1, ContentType.getExtensionEndIndex(url));
+	}
+
+	public void setStatus(LinkStatus status)
+	{
+		this.linkStatus.set(status);
+	}
+
+	public LinkStatus getStatus()
+	{
+		return this.linkStatusProperty().get();
 	}
 }

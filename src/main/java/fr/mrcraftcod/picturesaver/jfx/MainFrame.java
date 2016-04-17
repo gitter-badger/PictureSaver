@@ -7,6 +7,7 @@ import fr.mrcraftcod.picturesaver.jfx.components.table.DownloadsTable;
 import fr.mrcraftcod.picturesaver.objects.Page;
 import fr.mrcraftcod.picturesaver.threads.ThreadDispatcher;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -31,7 +32,7 @@ public class MainFrame extends Application implements ProgressListener
 		Scene scene = new Scene(createContent());
 		stage.setTitle(Constants.APP_NAME);
 		stage.setScene(scene);
-		stage.getIcons().add(new Image(Resources.ICONS.getResourceURL("icon64.png").toString()));
+		stage.getIcons().add(new Image(Constants.resources.getResource(Resources.ICONS, "icon64.png").toString()));
 		stage.sizeToScene();
 		stage.show();
 		threadDispatcher = new ThreadDispatcher();
@@ -74,6 +75,6 @@ public class MainFrame extends Application implements ProgressListener
 	@Override
 	public void pageAdded(Page page)
 	{
-		downloadsTable.addPage(page);
+		Platform.runLater(() -> downloadsTable.addPage(page));
 	}
 }

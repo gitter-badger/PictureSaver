@@ -1,6 +1,5 @@
 package fr.mrcraftcod.picturesaver.threads;
 
-import fr.mrcraftcod.picturesaver.enums.PageStatus;
 import fr.mrcraftcod.picturesaver.interfaces.ClipboardListener;
 import fr.mrcraftcod.picturesaver.interfaces.ProgressListener;
 import fr.mrcraftcod.picturesaver.objects.Page;
@@ -12,7 +11,7 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import static fr.mrcraftcod.picturesaver.enums.PageStatus.WAITING_DOWNLOAD;
+import static fr.mrcraftcod.picturesaver.enums.LinkStatus.*;
 
 public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 {
@@ -75,14 +74,13 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 			Page downloadPage = this.waitingDownload.remove();
 			this.addDownloadCount();
 			Thread thread = new Thread(new DownloadTask(downloadPage, page -> {
-				page.setStatus(PageStatus.DOWNLOADED);
+				page.updateStatus();
 				this.removeDownloadCount();
 			}, page -> {
-				this.downloading.remove(page);
-				this.waitingDownload.offer(page);
+				page.setStatus(WAITING_DOWNLOAD);
 				this.removeDownloadCount();
 			}));
-			this.downloading.add(downloadPage);
+			downloadPage.setStatus(DOWNLOADING);
 			thread.setDaemon(true);
 			this.getExecutor().submit(thread);
 		}
@@ -105,7 +103,7 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 		{
 			Page page = iterator.next();
 			iterator.remove();
-			page.fetchLinks(pageError -> pageError.setStatus(PageStatus.INITIALIZING));
+			page.fetchLinks(pageError -> pageError.setStatus(INITIALIZING));
 		}
 	}
 
@@ -129,7 +127,7 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 		page.onStatusChange(this::changeStatus);
 		page.onLinkFetched(evt -> evt.setStatus(WAITING_DOWNLOAD));
 		this.progressListeners.forEach(listener -> listener.pageAdded(page));
-		page.setStatus(PageStatus.INITIALIZING);
+		page.setStatus(INITIALIZING);
 	}
 
 	private void changeStatus(Page page)
@@ -144,6 +142,9 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 				break;
 			case WAITING_DOWNLOAD:
 				this.waitingDownload.offer(page);
+				break;
+			case DOWNLOADING:
+				this.downloading.add(page);
 				break;
 			case DOWNLOADED:
 				this.downloaded.add(page);

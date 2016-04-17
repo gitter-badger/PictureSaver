@@ -1,8 +1,10 @@
 package fr.mrcraftcod.picturesaver.enums;
 
-public enum PageStatus
+public enum LinkStatus
 {
+	ERROR,
 	INITIALIZING,
 	WAITING_DOWNLOAD,
-	DOWNLOADED;
+	DOWNLOADING,
+	DOWNLOADED
 }
