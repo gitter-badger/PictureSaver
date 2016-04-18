@@ -2,6 +2,7 @@ package fr.mrcraftcod.picturesaver.enums;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 public enum ContentType
 {
 	NULL(null),

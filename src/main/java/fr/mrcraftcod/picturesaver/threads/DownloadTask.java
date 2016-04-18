@@ -1,6 +1,7 @@
 package fr.mrcraftcod.picturesaver.threads;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
+import fr.mrcraftcod.picturesaver.enums.LinkStatus;
 import fr.mrcraftcod.picturesaver.objects.Page;
 import fr.mrcraftcod.picturesaver.objects.PageLink;
 import fr.mrcraftcod.utils.Callback;
@@ -11,6 +12,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import static fr.mrcraftcod.picturesaver.enums.LinkStatus.ERROR;
+import static fr.mrcraftcod.picturesaver.enums.LinkStatus.WAITING_DOWNLOAD;
 
 public class DownloadTask extends Task<Page>
 {
@@ -37,7 +40,7 @@ public class DownloadTask extends Task<Page>
 						this.errorCallback.call(this.page);
 					return this.page;
 				}
-				if(!downloadLink(pageLink))
+				if(pageLink.getStatus() == WAITING_DOWNLOAD && !downloadLink(pageLink))
 				{
 					if(this.errorCallback != null)
 						this.errorCallback.call(this.page);
@@ -57,6 +60,7 @@ public class DownloadTask extends Task<Page>
 
 	private boolean downloadLink(PageLink pageLink) throws InterruptedException
 	{
+		pageLink.setStatus(LinkStatus.DOWNLOADING);
 		try(InputStream is = URLHandler.getAsBinary(pageLink.getUrl()); FileOutputStream fos = new FileOutputStream(pageLink.getOutputFile()))
 		{
 			int read = 0;
@@ -70,11 +74,19 @@ public class DownloadTask extends Task<Page>
 				Platform.runLater(() -> pageLink.setDownloadedBytes(tRead));
 			}
 		}
-		catch(IOException | UnirestException | URISyntaxException e)
+		catch(UnirestException | URISyntaxException e)
 		{
 			e.printStackTrace();
+			pageLink.setStatus(LinkStatus.WAITING_DOWNLOAD);
 			return false;
 		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+			pageLink.setStatus(ERROR);
+			return true;
+		}
+		pageLink.setStatus(LinkStatus.DOWNLOADED);
 		return true;
 	}
 }
