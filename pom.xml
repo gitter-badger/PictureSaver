@@ -9,6 +9,12 @@
     <version>0.0.1</version>
 
     <name>PictureSaver</name>
+    <repositories>
+        <repository>
+            <id>dropbox.mrcraftcod</id>
+            <url>https://www.dropbox.com/sh/8cqruh6pmuzbovf/AAAX0xHJ7rhXEjQ_okKusjN1a?dl=0</url>
+        </repository>
+    </repositories>
     <build>
         <plugins>
             <plugin>
