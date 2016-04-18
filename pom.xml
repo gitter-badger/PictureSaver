@@ -75,8 +75,8 @@
     </build>
     <repositories>
         <repository>
-            <id>dropbox.mrcraftcod</id>
-            <url>https://www.dropbox.com/sh/8cqruh6pmuzbovf/AAAX0xHJ7rhXEjQ_okKusjN1a?dl=0</url>
+            <id>mrcraftcod</id>
+            <url>https://mymavenrepo.com/repo/wdkX6YiH9wN4qdzT8ciF/</url>
         </repository>
     </repositories>
     <dependencies>
