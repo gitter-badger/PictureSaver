@@ -79,13 +79,6 @@
             <url>https://mymavenrepo.com/repo/wdkX6YiH9wN4qdzT8ciF/</url>
         </repository>
     </repositories>
-    <servers>
-        <server>
-            <id>mrcraftcod.read</id>
-            <username>myMavenRepo</username>
-            <password>mrcraftcod</password>
-        </server>
-    </servers>
     <dependencies>
         <dependency>
             <groupId>org.jsoup</groupId>
