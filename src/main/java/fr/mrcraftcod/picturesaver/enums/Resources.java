@@ -4,7 +4,7 @@ import fr.mrcraftcod.utils.resources.ResourceElement;
 
 public enum Resources implements ResourceElement
 {
-	ICONS("icons");
+	ICONS("icons"), LANG("lang");
 
 	private final String root;
 
