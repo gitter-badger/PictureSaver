@@ -1,5 +1,6 @@
 package fr.mrcraftcod.picturesaver;
 
+import fr.mrcraftcod.picturesaver.enums.ConfigKey;
 import fr.mrcraftcod.picturesaver.objects.Configuration;
 import fr.mrcraftcod.utils.FileUtils;
 import fr.mrcraftcod.utils.Log;
@@ -19,6 +20,7 @@ public class Constants
 		try
 		{
 			configuration = new Configuration(new File(FileUtils.getAppDataFolder() + File.separator + "PictureSaver", "config.db"), true);
+			configuration.setDefaultValues(ConfigKey.getAll());
 		}
 		catch(Exception e)
 		{

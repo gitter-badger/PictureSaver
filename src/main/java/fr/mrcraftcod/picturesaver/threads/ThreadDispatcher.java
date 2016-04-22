@@ -46,19 +46,22 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 		this.executor = Executors.newFixedThreadPool(MAX_SIMULTANEOUS_FETCHING + MAX_SIMULTANEOUS_DOWNLOADS + 1);
 		this.threadClipboard = new ThreadClipboard();
 		this.threadClipboard.addListener(this);
-		Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH, mail -> {
-			Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH_PASSWORD, password -> {
-				try
-				{
-					this.threadMail = GMailUtils.fetchGMailFolder(mail, password, "INBOX", new GMailHandler(this::clipboardChangeEvent));
-				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
+		Constants.configuration.getBooleanValue(ConfigKey.EMAIL_FETCH_STATUS, status -> {
+			if(status)
+				Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH_MAIL, mail -> {
+					Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH_PASSWORD, password -> {
+						try
+						{
+							this.threadMail = GMailUtils.fetchGMailFolder(mail, password, "INBOX", new GMailHandler(this::clipboardChangeEvent));
+						}
+						catch(Exception e)
+						{
+							e.printStackTrace();
+						}
+					}, null);
+				}, null);
+				this.executor.submit(threadClipboard);
 			}, null);
-		}, null);
-		this.executor.submit(threadClipboard);
 	}
 
 	public void addProgressListener(ProgressListener listener)

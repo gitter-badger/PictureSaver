@@ -21,8 +21,8 @@ public class ConstantsTest
 	public void configurationTest() throws InterruptedException, ClassNotFoundException
 	{
 		Configuration configuration = new Configuration(new File(FileUtils.getAppDataFolder() + File.separator + Constants.APP_NAME, "configTest.db"), false);
-		configuration.setValue(ConfigKey.EMAIL_FETCH, "Test1").done(rowChanged -> {
-			configuration.getStringValue(ConfigKey.EMAIL_FETCH, val -> Assert.assertEquals("Test1", val), err -> Assert.fail("Couldn't get setting value"));
+		configuration.setValue(ConfigKey.EMAIL_FETCH_MAIL, "Test1").done(rowChanged -> {
+			configuration.getStringValue(ConfigKey.EMAIL_FETCH_MAIL, val -> Assert.assertEquals("Test1", val), err -> Assert.fail("Couldn't get setting value"));
 		}).fail(err -> Assert.fail("Error setting value"));
 	}
 }
