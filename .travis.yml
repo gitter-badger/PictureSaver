@@ -12,7 +12,3 @@ notifications:
 cache:
   directories:
     - $HOME/.m2
-env:
-  global:
-    - MCC_FETCH_USER=myMavenRepo
-    - MCC_FETCH_PASSWORD=mrcraftcod
