@@ -13,7 +13,6 @@ public class ThreadClipboard extends ThreadLoop
 	private static final long SLEEP_INTERVAL = 333;
 	private String lastClipboard;
 	private final ArrayList<ClipboardListener> listeners;
-	private boolean running;
 
 	public ThreadClipboard()
 	{
@@ -24,7 +23,6 @@ public class ThreadClipboard extends ThreadLoop
 	{
 		this.setName("PS-TC");
 		this.setDaemon(true);
-		running = true;
 		listeners = new ArrayList<>();
 		lastClipboard = takeOnlyNew ? getClipboardAsText() : null;
 	}

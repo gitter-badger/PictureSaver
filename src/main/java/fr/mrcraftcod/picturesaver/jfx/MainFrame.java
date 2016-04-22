@@ -42,6 +42,7 @@ public class MainFrame extends Application implements ProgressListener
 		stage.setOnCloseRequest(event -> {
 			threadDispatcher.close();
 			executor.shutdown();
+			Constants.configuration.close();
 		});
 	}
 

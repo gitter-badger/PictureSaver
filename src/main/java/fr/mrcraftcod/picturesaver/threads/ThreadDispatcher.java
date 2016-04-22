@@ -1,10 +1,15 @@
 package fr.mrcraftcod.picturesaver.threads;
 
+import fr.mrcraftcod.picturesaver.Constants;
+import fr.mrcraftcod.picturesaver.enums.ConfigKey;
 import fr.mrcraftcod.picturesaver.interfaces.ClipboardListener;
 import fr.mrcraftcod.picturesaver.interfaces.ProgressListener;
+import fr.mrcraftcod.picturesaver.objects.GMailHandler;
 import fr.mrcraftcod.picturesaver.objects.Page;
-import fr.mrcraftcod.picturesaver.utils.Log;
+import fr.mrcraftcod.utils.Log;
 import fr.mrcraftcod.utils.http.URLUtils;
+import fr.mrcraftcod.utils.mail.GMailFetcher;
+import fr.mrcraftcod.utils.mail.GMailUtils;
 import fr.mrcraftcod.utils.threads.ThreadLoop;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,6 +22,7 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 {
 	private static final long SLEEP_INTERVAL = 750;
 	private static final int MAX_SIMULTANEOUS_DOWNLOADS = 2;
+	private static final int MAX_SIMULTANEOUS_FETCHING = 2;
 	private final ThreadClipboard threadClipboard;
 	private final ArrayList<ProgressListener> progressListeners;
 	private final ArrayList<Page> waitingInit;
@@ -24,7 +30,9 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 	private final ArrayList<Page> downloaded;
 	private final ArrayList<Page> downloading;
 	private final ExecutorService executor;
+	private GMailFetcher threadMail;
 	private int downloadingCount;
+	private boolean first = true;
 
 	public ThreadDispatcher()
 	{
@@ -35,9 +43,21 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 		this.downloaded = new ArrayList<>();
 		this.downloading = new ArrayList<>();
 		this.progressListeners = new ArrayList<>();
+		this.executor = Executors.newFixedThreadPool(MAX_SIMULTANEOUS_FETCHING + MAX_SIMULTANEOUS_DOWNLOADS + 1);
 		this.threadClipboard = new ThreadClipboard();
 		this.threadClipboard.addListener(this);
-		this.executor = Executors.newFixedThreadPool(MAX_SIMULTANEOUS_DOWNLOADS + 1);
+		Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH, mail -> {
+			Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH_PASSWORD, password -> {
+				try
+				{
+					this.threadMail = GMailUtils.fetchGMailFolder(mail, password, "INBOX", new GMailHandler(this::clipboardChangeEvent));
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+			}, null);
+		}, null);
 		this.executor.submit(threadClipboard);
 	}
 
@@ -49,6 +69,8 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 	@Override
 	public void onClosed()
 	{
+		if(this.threadMail != null)
+			this.threadMail.close();
 		this.threadClipboard.close();
 		this.executor.shutdown();
 	}
@@ -103,7 +125,9 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 		{
 			Page page = iterator.next();
 			iterator.remove();
-			page.fetchLinks(pageError -> pageError.setStatus(INITIALIZING));
+			Thread thread = new Thread(() -> page.fetchLinks(pageError -> pageError.setStatus(INITIALIZING)));
+			thread.setDaemon(true);
+			this.getExecutor().submit(thread);
 		}
 	}
 

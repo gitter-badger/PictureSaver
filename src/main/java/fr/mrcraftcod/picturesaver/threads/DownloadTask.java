@@ -4,7 +4,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import fr.mrcraftcod.picturesaver.enums.LinkStatus;
 import fr.mrcraftcod.picturesaver.objects.Page;
 import fr.mrcraftcod.picturesaver.objects.PageLink;
-import fr.mrcraftcod.utils.Callback;
 import fr.mrcraftcod.utils.http.URLHandler;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -12,16 +11,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.function.Consumer;
 import static fr.mrcraftcod.picturesaver.enums.LinkStatus.ERROR;
 import static fr.mrcraftcod.picturesaver.enums.LinkStatus.WAITING_DOWNLOAD;
 
 public class DownloadTask extends Task<Page>
 {
 	private final Page page;
-	private final Callback<Page> successCallback;
-	private final Callback<Page> errorCallback;
+	private final Consumer<Page> successCallback;
+	private final Consumer<Page> errorCallback;
 
-	public DownloadTask(Page page, Callback<Page> successCallback, Callback<Page> errorCallback)
+	public DownloadTask(Page page, Consumer<Page> successCallback, Consumer<Page> errorCallback)
 	{
 		this.page = page;
 		this.successCallback = successCallback;
@@ -37,24 +37,24 @@ public class DownloadTask extends Task<Page>
 				if(this.isCancelled())
 				{
 					if(this.errorCallback != null)
-						this.errorCallback.call(this.page);
+						this.errorCallback.accept(this.page);
 					return this.page;
 				}
 				if(pageLink.getStatus() == WAITING_DOWNLOAD && !downloadLink(pageLink))
 				{
 					if(this.errorCallback != null)
-						this.errorCallback.call(this.page);
+						this.errorCallback.accept(this.page);
 				}
 			}
 			catch(InterruptedException e)
 			{
 				e.printStackTrace();
 				if(this.errorCallback != null)
-					this.errorCallback.call(this.page);
+					this.errorCallback.accept(this.page);
 				return this.page;
 			}
 		if(this.successCallback != null)
-			this.successCallback.call(this.page);
+			this.successCallback.accept(this.page);
 		return this.page;
 	}
 

@@ -3,7 +3,6 @@ package fr.mrcraftcod.picturesaver.objects;
 import fr.mrcraftcod.picturesaver.enums.ContentType;
 import fr.mrcraftcod.picturesaver.enums.LinkStatus;
 import fr.mrcraftcod.picturesaver.jfx.components.table.ProgressBarMax;
-import fr.mrcraftcod.utils.Callback;
 import fr.mrcraftcod.utils.FileUtils;
 import fr.mrcraftcod.utils.http.URLUtils;
 import javafx.application.Platform;
@@ -14,6 +13,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import static fr.mrcraftcod.picturesaver.enums.LinkStatus.*;
 
@@ -28,8 +28,8 @@ public class Page
 	private final SimpleLongProperty downloadedByteSize;
 	private final SimpleObjectProperty<ProgressBarMax> downloadBar;
 	private final ArrayList<PageLink> pageLinks;
-	private ArrayList<Callback<Page>> onLinkFetchedCallbacks;
-	private ArrayList<Callback<Page>> onStatusChangeCallbacks;
+	private ArrayList<Consumer<Page>> onLinkFetchedCallbacks;
+	private ArrayList<Consumer<Page>> onStatusChangeCallbacks;
 
 	public Page(String url) throws Exception
 	{
@@ -73,23 +73,23 @@ public class Page
 		return URLUtils.convertStringToURL(URLUtils.pullLinks(findURL).stream().filter(ContentType::isAllowed).collect(Collectors.toList())).stream().map(url -> new PageLink(this, url)).collect(Collectors.toList());
 	}
 
-	public void fetchLinks(Callback<Page> errorCallback)
+	public void fetchLinks(Consumer<Page> errorCallback)
 	{
 		Platform.runLater(() -> {
 			for(PageLink pageLink : this.getPageLinks())
 				if(!pageLink.fetch())
 				{
-					errorCallback.call(this);
+					errorCallback.accept(this);
 					return;
 				}
-			Page.this.onLinkFetchedCallbacks.forEach(pageCallback -> pageCallback.call(this));
+			Page.this.onLinkFetchedCallbacks.forEach(pageCallback -> pageCallback.accept(this));
 		});
 	}
 
 	public void setStatus(LinkStatus status)
 	{
 		this.status.set(status);
-		this.onStatusChangeCallbacks.forEach(callback -> callback.call(this));
+		this.onStatusChangeCallbacks.forEach(callback -> callback.accept(this));
 	}
 
 	public LinkStatus getStatus()
@@ -118,12 +118,12 @@ public class Page
 		return getOriginURL().toString() + " containing " + getPageLinks().size() + " links";
 	}
 
-	public void onLinkFetched(Callback<Page> callback)
+	public void onLinkFetched(Consumer<Page> callback)
 	{
 		onLinkFetchedCallbacks.add(callback);
 	}
 
-	public void onStatusChange(Callback<Page> callback)
+	public void onStatusChange(Consumer<Page> callback)
 	{
 		onStatusChangeCallbacks.add(callback);
 	}
