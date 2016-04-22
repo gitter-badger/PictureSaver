@@ -47,9 +47,6 @@ public class ThreadClipboard extends ThreadLoop
 	}
 
 	@Override
-	public void onClosed(){}
-
-	@Override
 	public void loop()
 	{
 		String newClipboard = getClipboardAsText();
