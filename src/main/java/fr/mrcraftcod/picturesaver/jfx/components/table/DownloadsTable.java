@@ -9,7 +9,11 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.input.MouseButton;
+import javafx.util.Callback;
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
 public class DownloadsTable extends TreeTableView<PageLinkItem>
@@ -28,6 +32,43 @@ public class DownloadsTable extends TreeTableView<PageLinkItem>
 		linkColumn.setCellValueFactory(cellData -> cellData.getValue().getValue().urlProperty());
 		TreeTableColumn<PageLinkItem, File> outputFileColumn = new TreeTableColumn<>("Path");
 		outputFileColumn.setCellValueFactory(cellData -> cellData.getValue().getValue().outputProperty());
+		outputFileColumn.setCellFactory(new Callback<TreeTableColumn<PageLinkItem, File>, TreeTableCell<PageLinkItem, File>>()
+		{
+			@Override
+			public TreeTableCell<PageLinkItem, File> call(TreeTableColumn<PageLinkItem, File> param)
+			{
+				TreeTableCell<PageLinkItem, File> cell = new TreeTableCell<PageLinkItem, File>()
+				{
+					public void updateItem(File item, boolean empty)
+					{
+						super.updateItem(item, empty);
+						setText(empty ? null : getString());
+						setGraphic(null);
+					}
+
+					private String getString()
+					{
+						return getItem() == null ? "" : getItem().toString();
+					}
+				};
+				cell.setOnMouseClicked(event -> {
+					if(event.getClickCount() > 1 && event.getButton() == MouseButton.SECONDARY)
+					{
+						TreeTableCell<PageLinkItem, File> cellEvt = (TreeTableCell<PageLinkItem, File>) event.getSource();
+						if(cellEvt.getItem() != null)
+							try
+							{
+								Desktop.getDesktop().open(cellEvt.getItem());
+							}
+							catch(IOException e)
+							{
+								e.printStackTrace();
+							}
+					}
+				});
+				return cell;
+			}
+		});
 		TreeTableColumn<PageLinkItem, LinkStatus> statusColumn = new TreeTableColumn<>("Status");
 		statusColumn.setCellValueFactory(cellData -> cellData.getValue().getValue().linkStatusProperty());
 		TreeTableColumn<PageLinkItem, Number> byteSizeColumn = new TreeTableColumn<>("Size");
