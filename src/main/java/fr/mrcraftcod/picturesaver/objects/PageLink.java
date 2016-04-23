@@ -10,6 +10,7 @@ import fr.mrcraftcod.utils.StringUtils;
 import fr.mrcraftcod.utils.http.URLHandler;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -24,14 +25,28 @@ public class PageLink
 	private final SimpleObjectProperty<ProgressBarMax> downloadProgressBar;
 	private final SimpleObjectProperty<LinkStatus> linkStatus;
 	private final SimpleObjectProperty<File> outputFile;
+	private final SimpleStringProperty fileName;
+	private final SimpleStringProperty subFolder;
 
 	public PageLink(Page parentPage, URL url)
+	{
+		this(parentPage, url, null);
+	}
+
+	public PageLink(Page parentPage, URL url, String fileName)
+	{
+		this(parentPage, url, fileName, null);
+	}
+
+	public PageLink(Page parentPage, URL url, String fileName, String subFolder)
 	{
 		this.parentPage = parentPage;
 		this.url = new SimpleObjectProperty<>(url);
 		this.byteSize = new SimpleLongProperty(-1);
 		this.downloadedBytes = new SimpleLongProperty(-1);
 		this.linkStatus = new SimpleObjectProperty<>(WAITING_DOWNLOAD);
+		this.fileName = new SimpleStringProperty(fileName);
+		this.subFolder = new SimpleStringProperty(subFolder);
 		this.outputFile = new SimpleObjectProperty<>(getOutputFile());
 		this.downloadProgressBar = new SimpleObjectProperty<>(new ProgressBarMax(this.downloadedBytesProperty(), this.byteSizeProperty()));
 		this.downloadProgressBarProperty().get().setMaxWidth(Double.MAX_VALUE);
@@ -119,17 +134,25 @@ public class PageLink
 
 	public File getOutputFile()
 	{
-		if(this.outputFileProperty() != null)
+		if(this.outputFileProperty() != null && this.outputFileProperty().isNotNull().get())
 			return this.outputFileProperty().get();
-		File file = new File(this.parentPage.getOutputFile(), FileUtils.sanitizeFileName(this.getFileName()));
+		File file = new File(buildFolder(), FileUtils.sanitizeFileName(this.getFileName()));
 		FileUtils.createDirectories(file);
 		return file;
 	}
 
+	private File buildFolder()
+	{
+		if(!this.subFolder.isEmpty().get())
+			return new File(this.parentPage.getOutputFile(), this.subFolder.get());
+		return this.parentPage.getOutputFile();
+	}
+
 	public String getFileName()
 	{
-		String url = this.url.toString();
-		return url.substring(url.lastIndexOf("/") + 1, ContentType.getExtensionEndIndex(url));
+		if(!this.fileName.isEmpty().get())
+			this.fileName.set(this.url.toString().substring(this.url.toString().lastIndexOf("/") + 1, ContentType.getExtensionEndIndex(this.url.toString())));
+		return this.fileName.get();
 	}
 
 	public void setStatus(LinkStatus status)

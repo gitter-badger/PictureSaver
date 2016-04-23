@@ -1,6 +1,7 @@
 package fr.mrcraftcod.picturesaver.enums;
 
 import fr.mrcraftcod.picturesaver.interfaces.LinkFetcher;
+import fr.mrcraftcod.picturesaver.objects.linkfetchers.DeviantartLinkFetcher;
 import fr.mrcraftcod.picturesaver.objects.linkfetchers.NormalLinkFetcher;
 import fr.mrcraftcod.utils.Log;
 import java.net.URL;
@@ -8,7 +9,8 @@ import java.util.regex.Pattern;
 
 public enum Origins
 {
-	NORMAL(".+", NormalLinkFetcher.class);
+	NORMAL(".+", NormalLinkFetcher.class),
+	DEVIANTART(".+deviantart\\.com/art/.+", DeviantartLinkFetcher.class);
 
 	private final Pattern pattern;
 	private final LinkFetcher linkFetcher;
