@@ -10,6 +10,3 @@ notifications:
   email: true
   on_success: always
   on_failure: always
-cache:
-  directories:
-    - $HOME/.m2
