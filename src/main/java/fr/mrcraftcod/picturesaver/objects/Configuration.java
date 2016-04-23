@@ -31,7 +31,7 @@ public class Configuration extends SQLiteManager
 
 	public <T> Promise<Integer, Throwable, Void> setValue(ConfigKey<T> configKey, T value)
 	{
-		return this.sendUpdateRequest("INSERT OR REPLACE INTO " + TABLE_DB_FILE + "(" + KEY_LABEL + "," + VALUE_LABEL + ") VALUES(\"" + configKey.getID() + "\", \"" + value.toString() + "\");");
+		return this.sendUpdateRequest("INSERT OR REPLACE INTO " + TABLE_DB_FILE + "(" + KEY_LABEL + "," + VALUE_LABEL + ") VALUES(\"" + configKey.getID() + "\", \"" + configKey.getWritableValue(value) + "\");");
 	}
 
 	public <T> void getValue(ConfigKey<T> configKey, Function<String, T> parser, Consumer<T> callback, Consumer<ConfigKey<T>> errorCallback)
@@ -72,5 +72,10 @@ public class Configuration extends SQLiteManager
 	public void getBooleanValue(ConfigKey<Boolean> configKey, Consumer<Boolean> callback, Consumer<ConfigKey<Boolean>> errorCallback)
 	{
 		getValue(configKey, Boolean::valueOf, callback, errorCallback);
+	}
+
+	public void getFileValue(ConfigKey<File> configKey, Consumer<File> callback, Consumer<ConfigKey<File>> errorCallback)
+	{
+		getValue(configKey, File::new, callback, errorCallback);
 	}
 }
