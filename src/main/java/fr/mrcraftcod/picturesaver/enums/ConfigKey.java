@@ -1,5 +1,6 @@
 package fr.mrcraftcod.picturesaver.enums;
 
+import java.io.File;
 import java.util.ArrayList;
 public class ConfigKey<T>
 {
@@ -42,5 +43,12 @@ public class ConfigKey<T>
 	public static ArrayList<ConfigKey> getAll()
 	{
 		return configKeys;
+	}
+
+	public String getWritableValue(T value)
+	{
+		if(value instanceof File)
+			return ((File) value).getAbsolutePath();
+		return value.toString();
 	}
 }

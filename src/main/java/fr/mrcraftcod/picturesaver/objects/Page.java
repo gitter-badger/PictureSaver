@@ -4,7 +4,6 @@ import fr.mrcraftcod.picturesaver.enums.ContentType;
 import fr.mrcraftcod.picturesaver.enums.LinkStatus;
 import fr.mrcraftcod.picturesaver.enums.Origins;
 import fr.mrcraftcod.picturesaver.jfx.components.table.ProgressBarMax;
-import fr.mrcraftcod.utils.FileUtils;
 import javafx.application.Platform;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.SimpleLongProperty;
@@ -22,7 +21,6 @@ public class Page
 	private static int NEXT_ID = 0;
 	private final int ID;
 	private final SimpleObjectProperty<URL> originURL;
-	private final SimpleObjectProperty<File> outputFolder;
 	private final SimpleObjectProperty<LinkStatus> status;
 	private final SimpleLongProperty byteSize;
 	private final SimpleLongProperty downloadedByteSize;
@@ -41,7 +39,6 @@ public class Page
 		this.ID = NEXT_ID++;
 		this.originURL = new SimpleObjectProperty<>(url);
 		this.origin = Origins.getOrigin(url);
-		this.outputFolder = new SimpleObjectProperty<>(getOutputFile());
 		this.byteSize = new SimpleLongProperty(-1);
 		this.downloadedByteSize = new SimpleLongProperty(-1);
 		this.downloadBar = new SimpleObjectProperty<>(new ProgressBarMax(this.downloadedByteSize, this.byteSize));
@@ -136,9 +133,7 @@ public class Page
 
 	public File getOutputFile()
 	{
-		if(outputFolderProperty() != null)
-			return outputFolderProperty().get();
-		return new File(FileUtils.getDesktopFolder(), "/" + this.getID() + "/");
+		return this.outputFolderProperty().get();
 	}
 
 	public int getID()
@@ -158,7 +153,7 @@ public class Page
 
 	public SimpleObjectProperty<File> outputFolderProperty()
 	{
-		return this.outputFolder;
+		return this.origin.outputFolderProperty();
 	}
 
 	public SimpleLongProperty byteSizeProperty()
