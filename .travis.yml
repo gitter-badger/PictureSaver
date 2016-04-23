@@ -1,6 +1,10 @@
 language: java
 jdk:
   - oraclejdk8
+branches:		
+  only:		
+    - master		
+    - development
 notifications:
   email: true
   on_success: always
