@@ -5,6 +5,7 @@ branches:
   only:		
     - master		
     - development
+    - develop
 notifications:
   email: true
   on_success: always
