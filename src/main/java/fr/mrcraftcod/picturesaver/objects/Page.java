@@ -2,9 +2,9 @@ package fr.mrcraftcod.picturesaver.objects;
 
 import fr.mrcraftcod.picturesaver.enums.ContentType;
 import fr.mrcraftcod.picturesaver.enums.LinkStatus;
+import fr.mrcraftcod.picturesaver.enums.Origins;
 import fr.mrcraftcod.picturesaver.jfx.components.table.ProgressBarMax;
 import fr.mrcraftcod.utils.FileUtils;
-import fr.mrcraftcod.utils.http.URLUtils;
 import javafx.application.Platform;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.SimpleLongProperty;
@@ -14,11 +14,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import static fr.mrcraftcod.picturesaver.enums.LinkStatus.*;
 
 public class Page
 {
+	private final Origins origin;
 	private static int NEXT_ID = 0;
 	private final int ID;
 	private final SimpleObjectProperty<URL> originURL;
@@ -40,6 +40,7 @@ public class Page
 	{
 		this.ID = NEXT_ID++;
 		this.originURL = new SimpleObjectProperty<>(url);
+		this.origin = Origins.getOrigin(url);
 		this.outputFolder = new SimpleObjectProperty<>(getOutputFile());
 		this.byteSize = new SimpleLongProperty(-1);
 		this.downloadedByteSize = new SimpleLongProperty(-1);
@@ -70,7 +71,7 @@ public class Page
 
 	private List<PageLink> findLinks(URL findURL) throws Exception
 	{
-		return URLUtils.convertStringToURL(URLUtils.pullLinks(findURL).stream().filter(ContentType::isAllowed).collect(Collectors.toList())).stream().map(url -> new PageLink(this, url)).collect(Collectors.toList());
+		return this.getOrigin().getFetcher().fetch(this, findURL);
 	}
 
 	public void fetchLinks(Consumer<Page> errorCallback)
@@ -183,5 +184,10 @@ public class Page
 		for(int i = 1; i < this.getPageLinks().size(); i++)
 			numberBinding = numberBinding.add(this.getPageLinks().get(i).downloadedBytesProperty());
 		return numberBinding;
+	}
+
+	public Origins getOrigin()
+	{
+		return this.origin;
 	}
 }
