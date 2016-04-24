@@ -3,7 +3,8 @@ package fr.mrcraftcod.picturesaver.jfx;
 import fr.mrcraftcod.picturesaver.Constants;
 import fr.mrcraftcod.picturesaver.enums.ConfigKey;
 import fr.mrcraftcod.picturesaver.interfaces.ConfigInput;
-import fr.mrcraftcod.picturesaver.jfx.components.StringInput;
+import fr.mrcraftcod.picturesaver.jfx.components.inputs.BooleanInput;
+import fr.mrcraftcod.picturesaver.jfx.components.inputs.StringInput;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -44,14 +45,22 @@ public class SettingsStage extends Stage
 	{
 		VBox root = new VBox();
 
+		BooleanInput fetchEmailStatus = createBooleanInput(ConfigKey.EMAIL_FETCH_STATUS, "Fetch emails?");
 		StringInput fetchEmailUser = createTextInput(ConfigKey.EMAIL_FETCH_MAIL, "Fetching email:");
 		StringInput fetchEmailPassword = createTextInput(ConfigKey.EMAIL_FETCH_PASSWORD, "Email password:");
 
-		this.updated.bind(fetchEmailUser.updatedProperty().or(fetchEmailPassword.updatedProperty()));
+		this.updated.bind(fetchEmailUser.updatedProperty().or(fetchEmailPassword.updatedProperty()).or(fetchEmailStatus.updatedProperty()));
 
 		HBox controls = createControls();
 
-		root.getChildren().addAll(fetchEmailUser, fetchEmailPassword, controls);
+		root.getChildren().addAll(fetchEmailStatus, fetchEmailUser, fetchEmailPassword, controls);
+		return root;
+	}
+
+	private BooleanInput createBooleanInput(ConfigKey<Boolean> configKey, String description)
+	{
+		BooleanInput root = new BooleanInput(configKey, description);
+		this.saveFunctions.add(root);
 		return root;
 	}
 
