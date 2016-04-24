@@ -2,6 +2,7 @@ package fr.mrcraftcod.picturesaver.objects;
 
 import fr.mrcraftcod.picturesaver.enums.ConfigKey;
 import fr.mrcraftcod.utils.config.SQLiteManager;
+import javafx.util.Pair;
 import org.jdeferred.Promise;
 import java.io.File;
 import java.sql.SQLException;
@@ -32,6 +33,17 @@ public class Configuration extends SQLiteManager
 	public <T> Promise<Integer, Throwable, Void> setValue(ConfigKey<T> configKey, T value)
 	{
 		return this.sendUpdateRequest("INSERT OR REPLACE INTO " + TABLE_DB_FILE + "(" + KEY_LABEL + "," + VALUE_LABEL + ") VALUES(\"" + configKey.getID() + "\", \"" + configKey.getWritableValue(value) + "\");");
+	}
+
+	public <T> Promise<Integer, Throwable, Void> setValues(Collection<Pair<ConfigKey, Object>> values)
+	{
+		StringBuilder stringBuilder = new StringBuilder("INSERT OR REPLACE INTO ").append(TABLE_DB_FILE).append("(").append(KEY_LABEL).append(",").append(VALUE_LABEL).append(") VALUES");
+		for(Pair<ConfigKey, Object> pair : values)
+		{
+			stringBuilder.append("(\"").append(pair.getKey().getID()).append("\",\"").append(pair.getKey().getWritableValue(pair.getValue())).append("\"),");
+		}
+		stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(), ";");
+		return this.sendUpdateRequest(stringBuilder.toString());
 	}
 
 	public <T> void getValue(ConfigKey<T> configKey, Function<String, T> parser, Consumer<T> callback, Consumer<ConfigKey<T>> errorCallback)

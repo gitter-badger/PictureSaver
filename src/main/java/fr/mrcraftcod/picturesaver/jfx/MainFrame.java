@@ -10,8 +10,12 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +33,7 @@ public class MainFrame extends Application implements ProgressListener
 	@Override
 	public void start(Stage stage) throws Exception
 	{
-		Scene scene = new Scene(createContent());
+		Scene scene = new Scene(createContent(stage));
 		stage.setTitle(Constants.APP_NAME);
 		stage.setScene(scene);
 		stage.getIcons().add(new Image(Constants.resources.getResource(Resources.ICONS, "icon64.png").toString()));
@@ -46,13 +50,23 @@ public class MainFrame extends Application implements ProgressListener
 		});
 	}
 
-	private Parent createContent()
+	private Parent createContent(Stage stage)
 	{
+		VBox root = new VBox();
+
+		MenuBar menuBar = new MenuBar();
+		Menu menuFile = new Menu("File");
+		MenuItem settingsItem = new MenuItem("Settings");
+		settingsItem.setOnAction(evt -> openSettings(stage));
+		menuFile.getItems().addAll(settingsItem);
+		menuBar.getMenus().addAll(menuFile);
+
+
 		downloadsTable = new DownloadsTable();
 
-		StackPane root = new StackPane();
-		root.setPrefSize(800, 600);
-		root.getChildren().addAll(downloadsTable);
+		StackPane stackPane = new StackPane();
+		stackPane.setPrefSize(800, 600);
+		stackPane.getChildren().addAll(downloadsTable);
 
 		/*new Thread(() -> {
 			try
@@ -70,7 +84,15 @@ public class MainFrame extends Application implements ProgressListener
 			}
 		}).run();*/
 
+		root.getChildren().addAll(menuBar, stackPane);
+
 		return root;
+	}
+
+	private void openSettings(Stage parentStage)
+	{
+		Stage settings = new SettingsStage(parentStage);
+		settings.show();
 	}
 
 	@Override
