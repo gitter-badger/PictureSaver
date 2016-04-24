@@ -1,4 +1,5 @@
 language: java
+install: "mvn -U clean install -DskipTests=true -B"
 jdk:
   - oraclejdk8
 branches:		
