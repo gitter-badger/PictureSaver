@@ -11,6 +11,8 @@ import fr.mrcraftcod.utils.http.URLHandler;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -134,7 +136,12 @@ public class PageLink
 
 	public File getOutputFile()
 	{
-		if(this.outputFileProperty() != null && this.outputFileProperty().isNotNull().get())
+		return getOutputFile(false);
+	}
+
+	public File getOutputFile(boolean force)
+	{
+		if(!force && this.outputFileProperty() != null && this.outputFileProperty().isNotNull().get())
 			return this.outputFileProperty().get();
 		File file = new File(buildFolder(), FileUtils.sanitizeFileName(this.getFileName()));
 		FileUtils.createDirectories(file);
@@ -143,6 +150,14 @@ public class PageLink
 
 	private File buildFolder()
 	{
+		this.parentPage.outputFolderProperty().addListener(new ChangeListener<File>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends File> observable, File oldValue, File newValue)
+			{
+				outputFileProperty().set(getOutputFile(true));
+			}
+		});
 		if(!this.subFolder.isEmpty().get())
 			return new File(this.parentPage.getOutputFile(), this.subFolder.get());
 		return this.parentPage.getOutputFile();
