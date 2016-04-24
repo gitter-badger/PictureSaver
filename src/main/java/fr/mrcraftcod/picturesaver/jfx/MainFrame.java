@@ -57,8 +57,10 @@ public class MainFrame extends Application implements ProgressListener
 		MenuBar menuBar = new MenuBar();
 		Menu menuFile = new Menu("File");
 		MenuItem settingsItem = new MenuItem("Settings");
+		MenuItem foldersItem = new MenuItem("Folder outputs");
 		settingsItem.setOnAction(evt -> openSettings(stage));
-		menuFile.getItems().addAll(settingsItem);
+		foldersItem.setOnAction(evt -> openFoldersOutputs(stage));
+		menuFile.getItems().addAll(settingsItem, foldersItem);
 		menuBar.getMenus().addAll(menuFile);
 
 
@@ -87,6 +89,12 @@ public class MainFrame extends Application implements ProgressListener
 		root.getChildren().addAll(menuBar, stackPane);
 
 		return root;
+	}
+
+	private void openFoldersOutputs(Stage parentStage)
+	{
+		Stage foldersOutputs = new FoldersOutputsStage(parentStage);
+		foldersOutputs.show();
 	}
 
 	private void openSettings(Stage parentStage)
