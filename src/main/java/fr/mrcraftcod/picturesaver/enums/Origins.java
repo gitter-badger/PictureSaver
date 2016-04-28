@@ -34,14 +34,14 @@ public enum Origins
 			Log.error("Couldn't instantiate LinkFetcher for origin " + this, e);
 		}
 		this.linkFetcher = fetcher;
-		this.outputFileKey = new ConfigKey<File>("OutputFolder" + this.toString());
+		this.outputFileKey = new ConfigKey<File>("OutputFolder" + this.name());
 		this.outputFolder = new SimpleObjectProperty<>(buildOutputFolder());
 	}
 
 	private File buildOutputFolder()
 	{
-		Constants.configuration.getFileValue(this.outputFileKey, file -> this.outputFolderProperty().set(file), null);
-		return new File(FileUtils.getDesktopFolder(), "/" + this.toString() + "/");
+		Constants.configuration.getFileValue(getOutputFolderKey(), file -> this.outputFolderProperty().set(file), null);
+		return new File(FileUtils.getDesktopFolder(), "/" + this.name() + "/");
 	}
 
 	public static Origins getDefault()
@@ -81,5 +81,10 @@ public enum Origins
 	public SimpleObjectProperty<File> outputFolderProperty()
 	{
 		return this.outputFolder;
+	}
+
+	public ConfigKey<File> getOutputFolderKey()
+	{
+		return this.outputFileKey;
 	}
 }

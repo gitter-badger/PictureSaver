@@ -1,27 +1,35 @@
-package fr.mrcraftcod.picturesaver.jfx;
+package fr.mrcraftcod.picturesaver.jfx.components;
 
 import fr.mrcraftcod.picturesaver.Constants;
 import fr.mrcraftcod.picturesaver.enums.ConfigKey;
 import fr.mrcraftcod.picturesaver.interfaces.ConfigInput;
+import fr.mrcraftcod.picturesaver.jfx.components.inputs.FileInput;
+import fr.mrcraftcod.picturesaver.jfx.components.inputs.StringInput;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.Parent;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 
-public class FoldersOutputsStage extends Stage
+public abstract class SettingStageBase extends Stage
 {
-	private SimpleBooleanProperty updated;
-	private ArrayList<ConfigInput> saveFunctions;
+	private final Stage parent;
+	private final SimpleBooleanProperty updated;
+	private final ArrayList<ConfigInput> saveFunctions;
 
-	public FoldersOutputsStage(Stage parentStage)
+	public SettingStageBase(Stage parentStage)
 	{
 		super();
+		this.parent = parentStage;
 		this.updated = new SimpleBooleanProperty(false);
 		this.saveFunctions = new ArrayList<>();
 		this.initModality(Modality.WINDOW_MODAL);
@@ -29,6 +37,19 @@ public class FoldersOutputsStage extends Stage
 		this.setScene(new Scene(createContent()));
 		this.setOnCloseRequest(evt -> closeFrame());
 	}
+
+	private VBox createContent()
+	{
+		VBox root = new VBox();
+
+		HBox controls = createControls();
+
+		root.getChildren().addAll(getComponents());
+		root.getChildren().addAll(controls);
+		return root;
+	}
+
+	protected abstract Collection<? extends Node> getComponents();
 
 	private void closeFrame()
 	{
@@ -39,14 +60,10 @@ public class FoldersOutputsStage extends Stage
 		this.close();
 	}
 
-	private Parent createContent()
+	protected FileInput createFileInput(ConfigKey<File> configKey, String description)
 	{
-		VBox root = new VBox();
-
-
-		HBox controls = createControls();
-
-		root.getChildren().addAll(controls);
+		FileInput root = new FileInput(this, configKey, description);
+		this.saveFunctions.add(root);
 		return root;
 	}
 
@@ -62,6 +79,8 @@ public class FoldersOutputsStage extends Stage
 		Button cancel = new Button("Cancel");
 		cancel.setMaxWidth(Double.MAX_VALUE);
 		cancel.setOnAction(evt -> closeFrame());
+		HBox.setHgrow(save, Priority.ALWAYS);
+		HBox.setHgrow(cancel, Priority.ALWAYS);
 		root.getChildren().addAll(save, cancel);
 		return root;
 	}
@@ -73,5 +92,17 @@ public class FoldersOutputsStage extends Stage
 			keys.add(configInput.getValue());
 		Constants.configuration.setValues(keys);
 		this.close();
+	}
+
+	protected StringInput createTextInput(ConfigKey<String> configKey,  String description)
+	{
+		StringInput root = new StringInput(configKey, description);
+		this.saveFunctions.add(root);
+		return root;
+	}
+
+	public BooleanProperty updatedProperty()
+	{
+		return this.updated;
 	}
 }
