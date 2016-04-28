@@ -93,7 +93,7 @@ public class MainFrame extends Application implements ProgressListener
 
 	private void openFoldersOutputs(Stage parentStage)
 	{
-		Stage foldersOutputs = new FoldersOutputsStage(parentStage);
+		Stage foldersOutputs = new OutputFoldersStage(parentStage);
 		foldersOutputs.show();
 	}
 

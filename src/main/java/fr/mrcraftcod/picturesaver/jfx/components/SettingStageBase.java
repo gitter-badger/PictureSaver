@@ -3,6 +3,7 @@ package fr.mrcraftcod.picturesaver.jfx.components;
 import fr.mrcraftcod.picturesaver.Constants;
 import fr.mrcraftcod.picturesaver.enums.ConfigKey;
 import fr.mrcraftcod.picturesaver.interfaces.ConfigInput;
+import fr.mrcraftcod.picturesaver.jfx.components.inputs.BooleanInput;
 import fr.mrcraftcod.picturesaver.jfx.components.inputs.FileInput;
 import fr.mrcraftcod.picturesaver.jfx.components.inputs.StringInput;
 import javafx.beans.property.BooleanProperty;
@@ -60,7 +61,7 @@ public abstract class SettingStageBase extends Stage
 		this.close();
 	}
 
-	protected FileInput createFileInput(ConfigKey<File> configKey, String description)
+	public FileInput createFileInput(ConfigKey<File> configKey, String description)
 	{
 		FileInput root = new FileInput(this, configKey, description);
 		this.saveFunctions.add(root);
@@ -94,9 +95,16 @@ public abstract class SettingStageBase extends Stage
 		this.close();
 	}
 
-	protected StringInput createTextInput(ConfigKey<String> configKey,  String description)
+	public StringInput createTextInput(ConfigKey<String> configKey,  String description)
 	{
 		StringInput root = new StringInput(configKey, description);
+		this.saveFunctions.add(root);
+		return root;
+	}
+
+	public BooleanInput createBooleanInput(ConfigKey<Boolean> configKey, String description)
+	{
+		BooleanInput root = new BooleanInput(configKey, description);
 		this.saveFunctions.add(root);
 		return root;
 	}
