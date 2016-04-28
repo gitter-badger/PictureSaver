@@ -2,6 +2,7 @@ package fr.mrcraftcod.picturesaver.enums;
 
 import fr.mrcraftcod.picturesaver.Constants;
 import fr.mrcraftcod.picturesaver.interfaces.LinkFetcher;
+import fr.mrcraftcod.picturesaver.objects.configkeys.FileConfigKey;
 import fr.mrcraftcod.picturesaver.objects.linkfetchers.DeviantartLinkFetcher;
 import fr.mrcraftcod.picturesaver.objects.linkfetchers.NormalLinkFetcher;
 import fr.mrcraftcod.utils.FileUtils;
@@ -34,7 +35,7 @@ public enum Origins
 			Log.error("Couldn't instantiate LinkFetcher for origin " + this, e);
 		}
 		this.linkFetcher = fetcher;
-		this.outputFileKey = new ConfigKey<File>("OutputFolder" + this.name());
+		this.outputFileKey = new FileConfigKey("OutputFolder" + this.name());
 		this.outputFolder = new SimpleObjectProperty<>(buildOutputFolder());
 	}
 

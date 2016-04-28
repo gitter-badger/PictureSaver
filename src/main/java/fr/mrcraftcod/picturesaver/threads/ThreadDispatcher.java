@@ -46,20 +46,20 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 		this.executor = Executors.newFixedThreadPool(MAX_SIMULTANEOUS_FETCHING + MAX_SIMULTANEOUS_DOWNLOADS + 1);
 		this.threadClipboard = new ThreadClipboard();
 		this.threadClipboard.addListener(this);
-		Constants.configuration.getBooleanValue(ConfigKey.EMAIL_FETCH_STATUS, status -> {
-			if(status)
-				Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH_MAIL, mail -> {
-					Constants.configuration.getStringValue(ConfigKey.EMAIL_FETCH_PASSWORD, password -> {
-						try
-						{
-							this.threadMail = GMailUtils.fetchGMailFolder(mail, password, "INBOX", new GMailHandler(this::clipboardChangeEvent));
-						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
-						}
-					}, null);
-				}, null);
+		ArrayList<ConfigKey> mailKeys = new ArrayList<ConfigKey>();
+		mailKeys.add(ConfigKey.EMAIL_FETCH_STATUS);
+		mailKeys.add(ConfigKey.EMAIL_FETCH_MAIL);
+		mailKeys.add(ConfigKey.EMAIL_FETCH_PASSWORD);
+		Constants.configuration.getValues(mailKeys, result -> {
+			if(result.keySet().containsAll(mailKeys) && ConfigKey.EMAIL_FETCH_STATUS.parseValue(result.get(ConfigKey.EMAIL_FETCH_STATUS)))
+				try
+				{
+					this.threadMail = GMailUtils.fetchGMailFolder(ConfigKey.EMAIL_FETCH_MAIL.parseValue(result.get(ConfigKey.EMAIL_FETCH_MAIL)), ConfigKey.EMAIL_FETCH_PASSWORD.parseValue(result.get(ConfigKey.EMAIL_FETCH_PASSWORD)), "INBOX", new GMailHandler(this::clipboardChangeEvent));
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 				this.executor.submit(threadClipboard);
 			}, null);
 	}

@@ -7,8 +7,8 @@ import org.jdeferred.Promise;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Configuration extends SQLiteManager
 {
@@ -39,14 +39,45 @@ public class Configuration extends SQLiteManager
 	{
 		StringBuilder stringBuilder = new StringBuilder("INSERT OR REPLACE INTO ").append(TABLE_DB_FILE).append("(").append(KEY_LABEL).append(",").append(VALUE_LABEL).append(") VALUES");
 		for(Pair<ConfigKey, Object> pair : values)
-		{
 			stringBuilder.append("(\"").append(pair.getKey().getID()).append("\",\"").append(pair.getKey().getWritableValue(pair.getValue())).append("\"),");
-		}
 		stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(), ";");
 		return this.sendUpdateRequest(stringBuilder.toString());
 	}
 
-	public <T> void getValue(ConfigKey<T> configKey, Function<String, T> parser, Consumer<T> callback, Consumer<ConfigKey<T>> errorCallback)
+	public void getValues(Collection<ConfigKey> keys, Consumer<HashMap<ConfigKey, String>> callback, Consumer<Collection<ConfigKey>> errorCallback)
+	{
+		try
+		{
+			StringBuilder stringBuilder = new StringBuilder("SELECT * FROM ").append(TABLE_DB_FILE).append(" WHERE");
+			for(ConfigKey key : keys)
+				stringBuilder.append(" ").append(KEY_LABEL).append(" = \"").append(key.getID()).append("\" OR");
+			stringBuilder.replace(stringBuilder.length() - 3, stringBuilder.length(), ";");
+			this.sendQueryRequest(stringBuilder.toString()).done(result -> {
+				try
+				{
+					HashMap<ConfigKey, String> results = new HashMap<>();
+					while(result.next())
+					{
+						ConfigKey key = ConfigKey.getWithID(result.getString(KEY_LABEL));
+						results.put(key, result.getString(VALUE_LABEL));
+					}
+					callback.accept(results);
+					if(errorCallback != null && results.size() != keys.size())
+						errorCallback.accept(results.keySet());
+				}
+				catch(SQLException e)
+				{
+					e.printStackTrace();
+				}
+			}).fail(err -> errorCallback.accept(keys)).waitSafely();
+		}
+		catch(InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public <T> void getValue(ConfigKey<T> configKey, Consumer<T> callback, Consumer<ConfigKey<T>> errorCallback)
 	{
 		try
 		{
@@ -54,9 +85,8 @@ public class Configuration extends SQLiteManager
 				try
 				{
 					if(result.next())
-						callback.accept(parser.apply(result.getString(VALUE_LABEL)));
-					else
-						if(errorCallback != null)
+						callback.accept(configKey.parseValue(result.getString(VALUE_LABEL)));
+					else if(errorCallback != null)
 							errorCallback.accept(configKey);
 				}
 				catch(SQLException e)
@@ -73,21 +103,21 @@ public class Configuration extends SQLiteManager
 
 	public void getIntegerValue(ConfigKey<Integer> configKey, Consumer<Integer> callback, Consumer<ConfigKey<Integer>> errorCallBack)
 	{
-		getValue(configKey, Integer::parseInt, callback, errorCallBack);
+		getValue(configKey, callback, errorCallBack);
 	}
 
 	public void getStringValue(ConfigKey<String> configKey, Consumer<String> callback, Consumer<ConfigKey<String>> errorCallback)
 	{
-		getValue(configKey, o -> o, callback, errorCallback);
+		getValue(configKey, callback, errorCallback);
 	}
 
 	public void getBooleanValue(ConfigKey<Boolean> configKey, Consumer<Boolean> callback, Consumer<ConfigKey<Boolean>> errorCallback)
 	{
-		getValue(configKey, Boolean::valueOf, callback, errorCallback);
+		getValue(configKey, callback, errorCallback);
 	}
 
 	public void getFileValue(ConfigKey<File> configKey, Consumer<File> callback, Consumer<ConfigKey<File>> errorCallback)
 	{
-		getValue(configKey, File::new, callback, errorCallback);
+		getValue(configKey, callback, errorCallback);
 	}
 }
