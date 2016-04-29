@@ -4,27 +4,26 @@ import fr.mrcraftcod.picturesaver.enums.ConfigKeys;
 import fr.mrcraftcod.utils.config.SQLiteManager;
 import org.jdeferred.Promise;
 import java.io.File;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Consumer;
 
 public class Configuration extends SQLiteManager
 {
-	private final ArrayList<fr.mrcraftcod.picturesaver.objects.ConfigValue> configValues;
+	private final ConfigList configValues;
 	private final String TABLE_DB_FILE = "Config";
 	private final String KEY_LABEL = "Name";
-	private final String VALUE_LABEL = "Content";
+	public static final String VALUE_LABEL = "Content";
 
 	public Configuration(File databaseURL, boolean log) throws ClassNotFoundException, InterruptedException
 	{
 		super(databaseURL, log);
-		this.configValues = new ArrayList<>();
+		this.configValues = new ConfigList();
 		this.sendUpdateRequest("CREATE TABLE IF NOT EXISTS " + TABLE_DB_FILE + "(" + KEY_LABEL + " varchar(75), " + VALUE_LABEL + " blob, PRIMARY KEY (" + KEY_LABEL + "));").waitSafely();
-		this.pullAllValues();
 	}
 
-	private void pullAllValues() throws InterruptedException
+	public void pullAllValues() throws InterruptedException
 	{
 		this.sendQueryRequest("SELECT * FROM " + TABLE_DB_FILE + ";").done(resultSet -> {
 			try
@@ -32,7 +31,7 @@ public class Configuration extends SQLiteManager
 				while(resultSet.next())
 				{
 					ConfigKeys key = ConfigKeys.getWithID(resultSet.getString(KEY_LABEL));
-					configValues.add(new fr.mrcraftcod.picturesaver.objects.ConfigValue(key, key.parseValue(resultSet.getString(VALUE_LABEL))));
+					configValues.add(new ConfigValue(key, key.parseValue(resultSet.getString(VALUE_LABEL))));
 				}
 			}
 			catch(SQLException e)
@@ -62,23 +61,32 @@ public class Configuration extends SQLiteManager
 			errorCallback.accept(values);
 	}
 
-	public <T> fr.mrcraftcod.picturesaver.objects.ConfigValue getValue(ConfigKeys<T> configKey)
+	public <T> ConfigValue getValue(ConfigKeys<T> configKey)
 	{
 		for(fr.mrcraftcod.picturesaver.objects.ConfigValue value : this.configValues)
 			if(value.getKey().is(configKey))
 				return value;
-		return null;
+		ConfigValue<T> configValue = new ConfigValue(configKey);
+		configValues.add(configValue);
+		return configValue;
 	}
 
 	@Override
 	public void close()
 	{
-		syncValues();
+		try
+		{
+			setValues(this.configValues).waitSafely();
+		}
+		catch(InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 		super.close();
 	}
 
-	private void syncValues()
+	public <T> Promise<ResultSet, Throwable, Void> pullValue(ConfigKeys<T> key)
 	{
-
+		return this.sendQueryRequest("SELECT * FROM " + TABLE_DB_FILE + " WHERE " + KEY_LABEL + " = \"" + key.getID() + "\";");
 	}
 }

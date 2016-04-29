@@ -3,6 +3,7 @@ package fr.mrcraftcod.picturesaver.objects;
 import fr.mrcraftcod.picturesaver.enums.ConfigKeys;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 public class ConfigList extends ArrayList<fr.mrcraftcod.picturesaver.objects.ConfigValue>
 {
@@ -20,5 +21,26 @@ public class ConfigList extends ArrayList<fr.mrcraftcod.picturesaver.objects.Con
 			if(this.get(key) == null)
 				return false;
 		return true;
+	}
+
+	public void remove(ConfigKeys key)
+	{
+		Iterator<ConfigValue> it = this.iterator();
+		while(it.hasNext())
+		{
+			ConfigValue value = it.next();
+			if(value.getKey().is(key))
+				it.remove();
+		}
+	}
+
+	@Override
+	public boolean add(ConfigValue configValue)
+	{
+		if(configValue == null)
+			return false;
+		if(this.contains(configValue.getKey()))
+			this.remove(configValue.getKey());
+		return super.add(configValue);
 	}
 }

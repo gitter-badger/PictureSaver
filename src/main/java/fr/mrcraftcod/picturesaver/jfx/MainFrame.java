@@ -25,8 +25,9 @@ public class MainFrame extends Application implements ProgressListener
 	private ThreadDispatcher threadDispatcher;
 	private DownloadsTable downloadsTable;
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws InterruptedException
 	{
+		Constants.configuration.pullAllValues();
 		launch(args);
 	}
 

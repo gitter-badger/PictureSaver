@@ -1,8 +1,10 @@
 package fr.mrcraftcod.picturesaver.objects;
 
+import fr.mrcraftcod.picturesaver.Constants;
 import fr.mrcraftcod.picturesaver.enums.ConfigKeys;
 import javafx.beans.property.SimpleObjectProperty;
 import java.io.File;
+import java.sql.SQLException;
 
 public class ConfigValue<T>
 {
@@ -41,21 +43,50 @@ public class ConfigValue<T>
 
 	public String getWritableValue()
 	{
+		checkValue();
 		return this.getKey().getWritableValue(this.valueProperty().get());
 	}
 
 	public boolean getBooleanValue()
 	{
+		checkValue();
 		return (Boolean)this.valueProperty().get();
 	}
 
 	public String getStringValue()
 	{
+		checkValue();
 		return this.valueProperty().get().toString();
 	}
 
 	public File getFileValue()
 	{
+		checkValue();
 		return (File)this.valueProperty().get();
+	}
+
+	private void checkValue()
+	{
+		if(this.valueProperty().isNull().get())
+		{
+			try
+			{
+				Constants.configuration.pullValue(this.getKey()).done(resultSet -> {
+					try
+					{
+						if(resultSet.next())
+							this.valueProperty().set(this.getKey().parseValue(resultSet.getString(Configuration.VALUE_LABEL)));
+					}
+					catch(SQLException e)
+					{
+						e.printStackTrace();
+					}
+				}).waitSafely();
+			}
+			catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 }
