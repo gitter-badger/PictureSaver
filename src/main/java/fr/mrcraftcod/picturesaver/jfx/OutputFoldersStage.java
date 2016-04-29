@@ -29,8 +29,8 @@ public class OutputFoldersStage extends SettingStageBase
 		for(Origins origin : Origins.values())
 		{
 			HBox line = new HBox();
-			BooleanInput activated = createBooleanInput(origin.getActivatedKey(), "");
-			FileInput file = createFileInput(origin.getOutputFolderKey(), origin.name());
+			BooleanInput activated = createBooleanInput(origin.getActivatedConfigValue(), "");
+			FileInput file = createFileInput(origin.getOutputFolderConfigValue(), origin.name());
 
 			if(update == null)
 				update = file.updatedProperty().and(new SimpleBooleanProperty(true));
