@@ -1,6 +1,7 @@
 package fr.mrcraftcod.picturesaver.objects.configkeys;
 
 import fr.mrcraftcod.picturesaver.enums.ConfigKey;
+
 public class BooleanConfigKey extends ConfigKey<Boolean>
 {
 	public BooleanConfigKey(String ID)

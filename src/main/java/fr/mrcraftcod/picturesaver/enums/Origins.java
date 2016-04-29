@@ -2,14 +2,17 @@ package fr.mrcraftcod.picturesaver.enums;
 
 import fr.mrcraftcod.picturesaver.Constants;
 import fr.mrcraftcod.picturesaver.interfaces.LinkFetcher;
+import fr.mrcraftcod.picturesaver.objects.configkeys.BooleanConfigKey;
 import fr.mrcraftcod.picturesaver.objects.configkeys.FileConfigKey;
 import fr.mrcraftcod.picturesaver.objects.linkfetchers.DeviantartLinkFetcher;
 import fr.mrcraftcod.picturesaver.objects.linkfetchers.NormalLinkFetcher;
 import fr.mrcraftcod.utils.FileUtils;
 import fr.mrcraftcod.utils.Log;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public enum Origins
@@ -21,6 +24,8 @@ public enum Origins
 	private final LinkFetcher linkFetcher;
 	private final SimpleObjectProperty<File> outputFolder;
 	private final ConfigKey<File> outputFileKey;
+	private final SimpleBooleanProperty activated;
+	private final BooleanConfigKey activatedKey;
 
 	Origins(String pattern, Class<? extends LinkFetcher> linkFetcher)
 	{
@@ -36,13 +41,31 @@ public enum Origins
 		}
 		this.linkFetcher = fetcher;
 		this.outputFileKey = new FileConfigKey("OutputFolder" + this.name());
-		this.outputFolder = new SimpleObjectProperty<>(buildOutputFolder());
+		this.activatedKey = new BooleanConfigKey("OriginStatus" + this.name(), true);
+		this.outputFolder = new SimpleObjectProperty<>(new File(FileUtils.getDesktopFolder(), "/" + this.name() + "/"));
+		this.activated = new SimpleBooleanProperty(true);
+		initPropertiesConfig();
 	}
 
-	private File buildOutputFolder()
+	private void initPropertiesConfig()
 	{
-		Constants.configuration.getFileValue(getOutputFolderKey(), file -> this.outputFolderProperty().set(file), null);
-		return new File(FileUtils.getDesktopFolder(), "/" + this.name() + "/");
+		ArrayList<ConfigKey> keys = new ArrayList<>();
+		keys.add(getOutputFolderKey());
+		keys.add(getActivatedKey());
+		Constants.configuration.getValues(keys, results -> {
+			for(ConfigKey key : results.keySet())
+			{
+				if(key.is(getActivatedKey()))
+					this.activatedProperty().set(getActivatedKey().parseValue(results.get(key)));
+				else
+					this.outputFolderProperty().set(getOutputFolderKey().parseValue(results.get(key)));
+			}
+		}, null);
+	}
+
+	public SimpleBooleanProperty activatedProperty()
+	{
+		return this.activated;
 	}
 
 	public static Origins getDefault()
@@ -87,5 +110,10 @@ public enum Origins
 	public ConfigKey<File> getOutputFolderKey()
 	{
 		return this.outputFileKey;
+	}
+
+	public ConfigKey<Boolean> getActivatedKey()
+	{
+		return this.activatedKey;
 	}
 }

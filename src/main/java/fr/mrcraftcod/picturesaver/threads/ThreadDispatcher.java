@@ -151,6 +151,11 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 	private void addPage(Page page)
 	{
 		Log.info("New page detected: " + page);
+		if(!page.getOrigin().activatedProperty().get())
+		{
+			Log.info("Origin deactivated, skipping");
+			return;
+		}
 		page.onStatusChange(this::changeStatus);
 		page.onLinkFetched(evt -> evt.setStatus(WAITING_DOWNLOAD));
 		this.progressListeners.forEach(listener -> listener.pageAdded(page));

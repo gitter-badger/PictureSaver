@@ -69,4 +69,9 @@ public abstract class ConfigKey<T>
 	{
 		return this.getID().equals(id);
 	}
+
+	public boolean is(ConfigKey compare)
+	{
+		return this.getID().equals(compare.getID());
+	}
 }
