@@ -1,6 +1,6 @@
 package fr.mrcraftcod.picturesaver.objects;
 
-import fr.mrcraftcod.picturesaver.enums.ConfigKey;
+import fr.mrcraftcod.picturesaver.enums.ConfigKeys;
 import fr.mrcraftcod.utils.config.SQLiteManager;
 import org.jdeferred.Promise;
 import java.io.File;
@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public class Configuration extends SQLiteManager
 {
-	private final ArrayList<ConfigValue> configValues;
+	private final ArrayList<fr.mrcraftcod.picturesaver.objects.ConfigValue> configValues;
 	private final String TABLE_DB_FILE = "Config";
 	private final String KEY_LABEL = "Name";
 	private final String VALUE_LABEL = "Content";
@@ -31,8 +31,8 @@ public class Configuration extends SQLiteManager
 			{
 				while(resultSet.next())
 				{
-					ConfigKey key = ConfigKey.getWithID(resultSet.getString(KEY_LABEL));
-					configValues.add(new ConfigValue(key, key.parseValue(resultSet.getString(VALUE_LABEL))));
+					ConfigKeys key = ConfigKeys.getWithID(resultSet.getString(KEY_LABEL));
+					configValues.add(new fr.mrcraftcod.picturesaver.objects.ConfigValue(key, key.parseValue(resultSet.getString(VALUE_LABEL))));
 				}
 			}
 			catch(SQLException e)
@@ -42,19 +42,19 @@ public class Configuration extends SQLiteManager
 		}).waitSafely();
 	}
 
-	public Promise<Integer, Throwable, Void> setValues(Collection<ConfigValue> values)
+	public Promise<Integer, Throwable, Void> setValues(Collection<fr.mrcraftcod.picturesaver.objects.ConfigValue> values)
 	{
 		StringBuilder stringBuilder = new StringBuilder("INSERT OR REPLACE INTO ").append(TABLE_DB_FILE).append("(").append(KEY_LABEL).append(",").append(VALUE_LABEL).append(") VALUES");
-		for(ConfigValue value : values)
+		for(fr.mrcraftcod.picturesaver.objects.ConfigValue value : values)
 			stringBuilder.append("(\"").append(value.getKey().getID()).append("\",\"").append(value.getWritableValue()).append("\"),");
 		stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(), ";");
 		return this.sendUpdateRequest(stringBuilder.toString());
 	}
 
-	public void getValues(Collection<ConfigKey> keys, Consumer<ArrayList<ConfigValue>> callback, Consumer<Collection<ConfigValue>> errorCallback)
+	public void getValues(Collection<ConfigKeys> keys, Consumer<ConfigList> callback, Consumer<ConfigList> errorCallback)
 	{
-		ArrayList<ConfigValue> values = new ArrayList<>();
-		for(ConfigKey key : keys)
+		ConfigList values = new ConfigList();
+		for(ConfigKeys key : keys)
 			values.add(getValue(key));
 		if(keys.size() == values.size())
 			callback.accept(values);
@@ -62,9 +62,9 @@ public class Configuration extends SQLiteManager
 			errorCallback.accept(values);
 	}
 
-	public <T> ConfigValue<T> getValue(ConfigKey<T> configKey)
+	public <T> fr.mrcraftcod.picturesaver.objects.ConfigValue getValue(ConfigKeys<T> configKey)
 	{
-		for(ConfigValue value : this.configValues)
+		for(fr.mrcraftcod.picturesaver.objects.ConfigValue value : this.configValues)
 			if(value.getKey().is(configKey))
 				return value;
 		return null;

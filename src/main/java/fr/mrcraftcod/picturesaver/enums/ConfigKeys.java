@@ -5,9 +5,9 @@ import fr.mrcraftcod.picturesaver.objects.configkeys.StringConfigKey;
 import java.io.File;
 import java.util.ArrayList;
 
-public abstract class ConfigKey<T>
+public abstract class ConfigKeys<T>
 {
-	private static final ArrayList<ConfigKey> configKeys = new ArrayList<>();
+	private static final ArrayList<ConfigKeys> configKeys = new ArrayList<>();
 
 	public static final StringConfigKey EMAIL_FETCH_MAIL = new StringConfigKey("EmailFetch");
 	public static final StringConfigKey EMAIL_FETCH_PASSWORD = new StringConfigKey("EmailFetchPassword");
@@ -16,12 +16,12 @@ public abstract class ConfigKey<T>
 	private final String ID;
 	private final T defaultValue;
 
-	public ConfigKey(String ID)
+	public ConfigKeys(String ID)
 	{
 		this(ID, null);
 	}
 
-	public ConfigKey(String ID, T defaultValue)
+	public ConfigKeys(String ID, T defaultValue)
 	{
 		this.ID = ID;
 		this.defaultValue = defaultValue;
@@ -43,7 +43,7 @@ public abstract class ConfigKey<T>
 		return defaultValue != null;
 	}
 
-	public static ArrayList<ConfigKey> getAll()
+	public static ArrayList<ConfigKeys> getAll()
 	{
 		return configKeys;
 	}
@@ -57,9 +57,9 @@ public abstract class ConfigKey<T>
 
 	public abstract T parseValue(String value);
 
-	public static ConfigKey getWithID(String ID)
+	public static ConfigKeys getWithID(String ID)
 	{
-		for(ConfigKey configKey : getAll())
+		for(ConfigKeys configKey : getAll())
 			if(configKey.is(ID))
 				return configKey;
 		return null;
@@ -70,7 +70,7 @@ public abstract class ConfigKey<T>
 		return this.getID().equals(id);
 	}
 
-	public boolean is(ConfigKey compare)
+	public boolean is(ConfigKeys compare)
 	{
 		return this.getID().equals(compare.getID());
 	}

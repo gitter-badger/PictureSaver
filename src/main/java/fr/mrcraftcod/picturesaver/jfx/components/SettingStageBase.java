@@ -1,11 +1,11 @@
 package fr.mrcraftcod.picturesaver.jfx.components;
 
 import fr.mrcraftcod.picturesaver.Constants;
-import fr.mrcraftcod.picturesaver.enums.ConfigKey;
 import fr.mrcraftcod.picturesaver.interfaces.ConfigInput;
 import fr.mrcraftcod.picturesaver.jfx.components.inputs.BooleanInput;
 import fr.mrcraftcod.picturesaver.jfx.components.inputs.FileInput;
 import fr.mrcraftcod.picturesaver.jfx.components.inputs.StringInput;
+import fr.mrcraftcod.picturesaver.objects.ConfigValue;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;
@@ -16,7 +16,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,9 +60,9 @@ public abstract class SettingStageBase extends Stage
 		this.close();
 	}
 
-	public FileInput createFileInput(ConfigKey<File> configKey, String description)
+	public FileInput createFileInput(ConfigValue<File> configValue, String description)
 	{
-		FileInput root = new FileInput(this, configKey, description);
+		FileInput root = new FileInput(this, configValue, description);
 		this.saveFunctions.add(root);
 		return root;
 	}
@@ -88,23 +87,23 @@ public abstract class SettingStageBase extends Stage
 
 	private void save()
 	{
-		ArrayList<Pair<ConfigKey, Object>> keys = new ArrayList<>();
+		ArrayList<ConfigValue> keys = new ArrayList<>();
 		for(ConfigInput configInput : this.saveFunctions)
 			keys.add(configInput.getValue());
 		Constants.configuration.setValues(keys);
 		this.close();
 	}
 
-	public StringInput createTextInput(ConfigKey<String> configKey,  String description)
+	public StringInput createTextInput(ConfigValue<String> configValue,  String description)
 	{
-		StringInput root = new StringInput(configKey, description);
+		StringInput root = new StringInput(configValue, description);
 		this.saveFunctions.add(root);
 		return root;
 	}
 
-	public BooleanInput createBooleanInput(ConfigKey<Boolean> configKey, String description)
+	public BooleanInput createBooleanInput(ConfigValue<Boolean> configValue, String description)
 	{
-		BooleanInput root = new BooleanInput(configKey, description);
+		BooleanInput root = new BooleanInput(configValue, description);
 		this.saveFunctions.add(root);
 		return root;
 	}

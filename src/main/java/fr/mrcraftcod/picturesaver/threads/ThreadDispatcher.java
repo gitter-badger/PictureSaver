@@ -1,7 +1,7 @@
 package fr.mrcraftcod.picturesaver.threads;
 
 import fr.mrcraftcod.picturesaver.Constants;
-import fr.mrcraftcod.picturesaver.enums.ConfigKey;
+import fr.mrcraftcod.picturesaver.enums.ConfigKeys;
 import fr.mrcraftcod.picturesaver.interfaces.ClipboardListener;
 import fr.mrcraftcod.picturesaver.interfaces.ProgressListener;
 import fr.mrcraftcod.picturesaver.objects.GMailHandler;
@@ -46,15 +46,15 @@ public class ThreadDispatcher extends ThreadLoop implements ClipboardListener
 		this.executor = Executors.newFixedThreadPool(MAX_SIMULTANEOUS_FETCHING + MAX_SIMULTANEOUS_DOWNLOADS + 1);
 		this.threadClipboard = new ThreadClipboard();
 		this.threadClipboard.addListener(this);
-		ArrayList<ConfigKey> mailKeys = new ArrayList<ConfigKey>();
-		mailKeys.add(ConfigKey.EMAIL_FETCH_STATUS);
-		mailKeys.add(ConfigKey.EMAIL_FETCH_MAIL);
-		mailKeys.add(ConfigKey.EMAIL_FETCH_PASSWORD);
+		ArrayList<ConfigKeys> mailKeys = new ArrayList<ConfigKeys>();
+		mailKeys.add(ConfigKeys.EMAIL_FETCH_STATUS);
+		mailKeys.add(ConfigKeys.EMAIL_FETCH_MAIL);
+		mailKeys.add(ConfigKeys.EMAIL_FETCH_PASSWORD);
 		Constants.configuration.getValues(mailKeys, result -> {
-			if(result.keySet().containsAll(mailKeys) && ConfigKey.EMAIL_FETCH_STATUS.parseValue(result.get(ConfigKey.EMAIL_FETCH_STATUS)))
+			if(result.containsKeys(mailKeys) && result.get(ConfigKeys.EMAIL_FETCH_STATUS).getBooleanValue())
 				try
 				{
-					this.threadMail = GMailUtils.fetchGMailFolder(ConfigKey.EMAIL_FETCH_MAIL.parseValue(result.get(ConfigKey.EMAIL_FETCH_MAIL)), ConfigKey.EMAIL_FETCH_PASSWORD.parseValue(result.get(ConfigKey.EMAIL_FETCH_PASSWORD)), "INBOX", new GMailHandler(this::clipboardChangeEvent));
+					this.threadMail = GMailUtils.fetchGMailFolder(result.get(ConfigKeys.EMAIL_FETCH_MAIL).getStringValue(), result.get(ConfigKeys.EMAIL_FETCH_PASSWORD).getStringValue(), "INBOX", new GMailHandler(this::clipboardChangeEvent));
 				}
 				catch(Exception e)
 				{

@@ -23,7 +23,7 @@ public enum Origins
 	private final Pattern pattern;
 	private final LinkFetcher linkFetcher;
 	private final SimpleObjectProperty<File> outputFolder;
-	private final ConfigKey<File> outputFileKey;
+	private final ConfigKeys<File> outputFileKey;
 	private final SimpleBooleanProperty activated;
 	private final BooleanConfigKey activatedKey;
 
@@ -49,17 +49,12 @@ public enum Origins
 
 	private void initPropertiesConfig()
 	{
-		ArrayList<ConfigKey> keys = new ArrayList<>();
+		ArrayList<ConfigKeys> keys = new ArrayList<>();
 		keys.add(getOutputFolderKey());
 		keys.add(getActivatedKey());
 		Constants.configuration.getValues(keys, results -> {
-			for(ConfigKey key : results.keySet())
-			{
-				if(key.is(getActivatedKey()))
-					this.activatedProperty().set(getActivatedKey().parseValue(results.get(key)));
-				else
-					this.outputFolderProperty().set(getOutputFolderKey().parseValue(results.get(key)));
-			}
+			this.outputFolderProperty().set(results.get(getOutputFolderKey()).getFileValue());
+			this.activatedProperty().set(results.get(getActivatedKey()).getBooleanValue());
 		}, null);
 	}
 
@@ -107,13 +102,23 @@ public enum Origins
 		return this.outputFolder;
 	}
 
-	public ConfigKey<File> getOutputFolderKey()
+	public ConfigKeys<File> getOutputFolderKey()
 	{
 		return this.outputFileKey;
 	}
 
-	public ConfigKey<Boolean> getActivatedKey()
+	public ConfigKeys<Boolean> getActivatedKey()
 	{
 		return this.activatedKey;
+	}
+
+	public fr.mrcraftcod.picturesaver.objects.ConfigValue getOutputFolderConfigValue()
+	{
+		return Constants.configuration.getValue(getOutputFolderKey());
+	}
+
+	public fr.mrcraftcod.picturesaver.objects.ConfigValue getActivatedConfigValue()
+	{
+		return Constants.configuration.getValue(getActivatedKey());
 	}
 }

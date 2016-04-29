@@ -1,8 +1,8 @@
 package fr.mrcraftcod.picturesaver.objects.configkeys;
 
-import fr.mrcraftcod.picturesaver.enums.ConfigKey;
+import fr.mrcraftcod.picturesaver.enums.ConfigKeys;
 
-public class StringConfigKey extends ConfigKey<String>
+public class StringConfigKey extends ConfigKeys<String>
 {
 	public StringConfigKey(String ID)
 	{

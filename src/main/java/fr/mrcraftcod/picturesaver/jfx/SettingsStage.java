@@ -1,6 +1,7 @@
 package fr.mrcraftcod.picturesaver.jfx;
 
-import fr.mrcraftcod.picturesaver.enums.ConfigKey;
+import fr.mrcraftcod.picturesaver.Constants;
+import fr.mrcraftcod.picturesaver.enums.ConfigKeys;
 import fr.mrcraftcod.picturesaver.jfx.components.SettingStageBase;
 import fr.mrcraftcod.picturesaver.jfx.components.inputs.BooleanInput;
 import fr.mrcraftcod.picturesaver.jfx.components.inputs.StringInput;
@@ -22,9 +23,9 @@ public class SettingsStage extends SettingStageBase
 	{
 		LinkedList<Node> nodes = new LinkedList<>();
 
-		BooleanInput fetchEmailStatus = createBooleanInput(ConfigKey.EMAIL_FETCH_STATUS, "Fetch emails?");
-		StringInput fetchEmailUser = createTextInput(ConfigKey.EMAIL_FETCH_MAIL, "Fetching email:");
-		StringInput fetchEmailPassword = createTextInput(ConfigKey.EMAIL_FETCH_PASSWORD, "Email password:");
+		BooleanInput fetchEmailStatus = createBooleanInput(Constants.configuration.getValue(ConfigKeys.EMAIL_FETCH_STATUS), "Fetch emails?");
+		StringInput fetchEmailUser = createTextInput(Constants.configuration.getValue(ConfigKeys.EMAIL_FETCH_MAIL), "Fetching email:");
+		StringInput fetchEmailPassword = createTextInput(Constants.configuration.getValue(ConfigKeys.EMAIL_FETCH_PASSWORD), "Email password:");
 		Button folderOutputs = new Button("Folder outputs");
 		folderOutputs.setMaxWidth(Double.MAX_VALUE);
 		folderOutputs.setOnAction(evt -> new OutputFoldersStage(this).show());

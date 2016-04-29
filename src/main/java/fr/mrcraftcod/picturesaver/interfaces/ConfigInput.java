@@ -1,9 +1,8 @@
 package fr.mrcraftcod.picturesaver.interfaces;
 
-import fr.mrcraftcod.picturesaver.enums.ConfigKey;
-import javafx.util.Pair;
+import fr.mrcraftcod.picturesaver.objects.ConfigValue;
 
 public interface ConfigInput<T>
 {
-	public Pair<ConfigKey<T>, T> getValue();
+	public ConfigValue<T> getValue();
 }
