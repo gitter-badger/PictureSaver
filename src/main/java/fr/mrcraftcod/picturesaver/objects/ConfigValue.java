@@ -11,14 +11,21 @@ public class ConfigValue<T>
 
 	public ConfigValue(ConfigKey<T> key)
 	{
+		this(key, key.getDefault());
+		this.lastUpdated = System.currentTimeMillis();
+	}
+
+	public ConfigValue(ConfigKey<T> key, T value)
+	{
 		this.key = key;
-		this.value = new SimpleObjectProperty<>(null);
+		this.value = new SimpleObjectProperty<>(value);
 		this.lastUpdated = 0;
 	}
 
 	public void setValue(T value)
 	{
 		this.valueProperty().set(value);
+		this.lastUpdated = System.currentTimeMillis();
 	}
 
 	private SimpleObjectProperty<T> valueProperty()
@@ -28,6 +35,11 @@ public class ConfigValue<T>
 
 	public ConfigKey<T> getKey()
 	{
-		return key;
+		return this.key;
+	}
+
+	public String getWritableValue()
+	{
+		return this.getKey().getWritableValue(this.valueProperty().get());
 	}
 }
